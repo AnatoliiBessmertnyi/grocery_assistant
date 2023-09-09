@@ -1,0 +1,6 @@
+requests
+Django
+djangorestframework
+PyJWT
+djangorestframework-simplejwt
+django-filter

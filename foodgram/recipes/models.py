@@ -20,6 +20,13 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
+class Owner(models.Model):
+    first_name = models.CharField(max_length=128)
+    last_name = models.CharField(max_length=128)
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
+
 class Recipe(models.Model):
     name = models.CharField(
         max_length=256,
@@ -39,6 +46,11 @@ class Recipe(models.Model):
     #     related_name='recipes',
     #     verbose_name='Аавтор',
     # )
+    owner = models.ForeignKey(
+        Owner,
+        related_name='recipes',
+        on_delete=models.CASCADE
+    )
     ingredient = models.CharField(
         max_length=256,
         verbose_name='Название ингредиента',
@@ -54,7 +66,6 @@ class Recipe(models.Model):
         'Дата публикации',
         auto_now_add=True
     )
-
 
     def __str__(self):
         return self.name

@@ -5,8 +5,8 @@
 # from rest_framework import status
 from rest_framework import viewsets
 
-from .models import Recipe
-from .serializers import RecipeSerializer
+from .models import Recipe, Owner
+from .serializers import RecipeSerializer, OwnerSerializer 
 
 # Вью функции
 
@@ -68,3 +68,8 @@ from .serializers import RecipeSerializer
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer 
+
+
+class OwnerViewSet(viewsets.ModelViewSet):
+    queryset = Owner.objects.all()
+    serializer_class = OwnerSerializer 

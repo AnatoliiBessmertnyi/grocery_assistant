@@ -16,11 +16,13 @@ from rest_framework.routers import DefaultRouter
 
 from django.urls import include, path
 
-from recipes.views import RecipeViewSet
+from recipes.views import RecipeViewSet, OwnerViewSet
 
 router = DefaultRouter()
 router.register('api/recipes', RecipeViewSet, basename='recipes')
+router.register('api/owners', OwnerViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-] 
+]
+

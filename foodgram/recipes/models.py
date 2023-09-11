@@ -5,17 +5,7 @@ User = get_user_model()
 
 
 class Tag(models.Model):
-    name = models.CharField(
-        'Название',
-        max_length=50,
-        unique=True
-    )
-    color = models.CharField(
-        'Цвет',
-        max_length=50,
-        unique=True
-    )
-    slug = models.SlugField(unique=True)
+    name = models.CharField(max_length=64)
 
     def __str__(self):
         return self.name
@@ -32,13 +22,7 @@ class Recipe(models.Model):
         max_length=256,
         verbose_name='Название рецепта',
     )
-    # tag = models.ForeignKey(
-    #     Tag,
-    #     on_delete=models.SET_NULL,
-    #     related_name='recipes',
-    #     blank=True,
-    #     null=True
-    # )
+    tag = models.ManyToManyField(Tag, through='TagRecipe')
     cooking_time = models.IntegerField(blank=True, null=True)
     # author = models.ForeignKey(
     #     User,
@@ -70,4 +54,9 @@ class Recipe(models.Model):
     def __str__(self):
         return self.name
     
+class TagRecipe(models.Model):
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f'{self.tag} {self.recipe}' 

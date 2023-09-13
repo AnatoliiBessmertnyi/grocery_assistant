@@ -4,28 +4,33 @@ from .models import Recipe, Owner, Ingredient, IngredientRecipe, Tag, TagRecipe
 
 
 class TagSerializer(serializers.ModelSerializer):
+    tag_name = serializers.CharField(source='name')
 
     class Meta:
         model = Tag
-        fields = ('id', 'name')
+        fields = ('id', 'tag_name')
 
 
 class IngredientSerializer(serializers.ModelSerializer):
+    ingredient_name = serializers.CharField(source='name')
 
     class Meta:
         model = Ingredient
-        fields = ('id', 'name')
+        fields = ('id', 'ingredient_name')
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    # tags = TagSerializer(many=True, required=False)
+    # tags = TagSerializer(required=False)
     ingredients = IngredientSerializer(many=True)
+    publication_date = serializers.DateTimeField(
+        source='pub_date', read_only=True
+    )
 
     class Meta:
         model = Recipe
         fields = (
-            'id', 'name', 'cooking_time', 'ingredients', 'description',
-            'pub_date', 'owner', 'tags', 
+            'name', 'cooking_time', 'ingredients', 'description',
+            'publication_date', 'owner', 'tags', 
         ) 
 
     # def create(self, validated_data):
@@ -54,6 +59,18 @@ class RecipeSerializer(serializers.ModelSerializer):
                 ingredient=current_ingredient, recipe=recipe
             )
         return recipe
+
+
+class RecipeListSerializer(serializers.ModelSerializer):
+    publication_date = serializers.DateTimeField(
+        source='pub_date', read_only=True
+    )
+    
+    class Meta:
+        model = Recipe
+        fields = (
+            'id', 'name', 'cooking_time','publication_date', 'owner', 'tags'
+        ) 
 
 
 

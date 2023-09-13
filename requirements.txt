@@ -4,3 +4,4 @@ djangorestframework
 PyJWT
 djangorestframework-simplejwt
 django-filter
+djoser

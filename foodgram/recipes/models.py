@@ -10,6 +10,14 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
+
+class Ingredient(models.Model):
+    name = models.CharField(max_length=64)
+
+    def __str__(self):
+        return self.name
+
+
 class Owner(models.Model):
     first_name = models.CharField(max_length=128)
     last_name = models.CharField(max_length=128)
@@ -17,12 +25,17 @@ class Owner(models.Model):
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
 
+
 class Recipe(models.Model):
     name = models.CharField(
         max_length=256,
         verbose_name='Название рецепта',
     )
-    tag = models.ManyToManyField(Tag, through='TagRecipe')
+    tags = models.TextField()
+    # tags = models.ManyToManyField(Tag, through='TagRecipe')
+    ingredients = models.ManyToManyField(
+        Ingredient, through='IngredientRecipe'
+    )
     cooking_time = models.IntegerField(blank=True, null=True)
     # author = models.ForeignKey(
     #     User,
@@ -34,10 +47,6 @@ class Recipe(models.Model):
         Owner,
         related_name='recipes',
         on_delete=models.CASCADE
-    )
-    ingredient = models.CharField(
-        max_length=256,
-        verbose_name='Название ингредиента',
     )
     description = models.TextField(
         max_length=500,
@@ -53,10 +62,18 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
-    
+
+
 class TagRecipe(models.Model):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.tag} {self.recipe}' 
+        return f'{self.tag} {self.recipe}'
+
+class IngredientRecipe(models.Model):
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.ingredient} {self.recipe}' 

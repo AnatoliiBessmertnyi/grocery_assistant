@@ -1,6 +1,10 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 
-from .models import Recipe, Owner, Ingredient, IngredientRecipe, Tag, TagRecipe
+from .models import Recipe, Ingredient, IngredientRecipe, Tag, TagRecipe
+
+
+User = get_user_model()
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -30,7 +34,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = (
             'name', 'cooking_time', 'ingredients', 'description',
-            'publication_date', 'owner', 'tags', 
+            'publication_date', 'author', 'tags', 
         ) 
 
     # def create(self, validated_data):
@@ -69,14 +73,14 @@ class RecipeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = (
-            'id', 'name', 'cooking_time','publication_date', 'owner', 'tags'
+            'id', 'name', 'cooking_time','publication_date', 'author', 'tags'
         ) 
 
 
 
-class OwnerSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     recipes = serializers.StringRelatedField(read_only=True, many=True)
 
     class Meta:
-        model = Owner
+        model = User
         fields = ('first_name', 'last_name', 'recipes')

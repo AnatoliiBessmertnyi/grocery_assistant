@@ -18,14 +18,6 @@ class Ingredient(models.Model):
         return self.name
 
 
-class Owner(models.Model):
-    first_name = models.CharField(max_length=128)
-    last_name = models.CharField(max_length=128)
-
-    def __str__(self):
-        return f'{self.first_name} {self.last_name}'
-
-
 class Recipe(models.Model):
     name = models.CharField(
         max_length=256,
@@ -37,14 +29,8 @@ class Recipe(models.Model):
         Ingredient, through='IngredientRecipe'
     )
     cooking_time = models.IntegerField(blank=True, null=True)
-    # author = models.ForeignKey(
-    #     User,
-    #     on_delete=models.CASCADE,
-    #     related_name='recipes',
-    #     verbose_name='Аавтор',
-    # )
-    owner = models.ForeignKey(
-        Owner,
+    author = models.ForeignKey(
+        User,
         related_name='recipes',
         on_delete=models.CASCADE
     )

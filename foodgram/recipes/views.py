@@ -1,8 +1,12 @@
 from rest_framework import viewsets
+from django.contrib.auth import get_user_model
 
-from .models import Recipe, Owner
-from .serializers import RecipeSerializer, OwnerSerializer, RecipeListSerializer
+from .models import Recipe
+from .serializers import (
+    RecipeSerializer, UserSerializer, RecipeListSerializer
+)
 
+User = get_user_model()
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
@@ -14,6 +18,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return RecipeSerializer 
 
 
-class OwnerViewSet(viewsets.ModelViewSet):
-    queryset = Owner.objects.all()
-    serializer_class = OwnerSerializer 
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer 

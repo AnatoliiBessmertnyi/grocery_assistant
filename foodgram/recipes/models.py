@@ -12,7 +12,7 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=200)
 
     def __str__(self):
         return self.name
@@ -30,9 +30,7 @@ class Recipe(models.Model):
     )
     cooking_time = models.IntegerField(blank=True, null=True)
     author = models.ForeignKey(
-        User,
-        related_name='recipes',
-        on_delete=models.CASCADE
+        User, related_name='recipes', on_delete=models.CASCADE
     )
     description = models.TextField(
         max_length=500,
@@ -42,9 +40,11 @@ class Recipe(models.Model):
     #     upload_to='recipes/', null=True, blank=True
     # )
     pub_date = models.DateTimeField(
-        'Дата публикации',
-        auto_now_add=True
+        'Дата публикации', auto_now_add=True
     )
+
+    class Meta:
+        ordering = ['-pub_date']
 
     def __str__(self):
         return self.name

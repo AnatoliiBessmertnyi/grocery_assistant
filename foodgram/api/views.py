@@ -1,5 +1,6 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets
 from django.contrib.auth import get_user_model
+from django_filters.rest_framework import DjangoFilterBackend
 
 from recipes.models import Recipe, Ingredient
 from .serializers import (
@@ -15,6 +16,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (AuthorOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('name','tags', 'author')
 
 # Вывод информации на главной и в подробностях рецепта разный
     def get_serializer_class(self):
@@ -34,6 +37,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    # Нужно настроить
+    # filter_backends = (DjangoFilterBackend,)
+    # filterset_fields = ('first_name','email')
 
 
 class IngredientViewSet(viewsets.ModelViewSet):

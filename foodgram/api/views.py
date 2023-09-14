@@ -45,3 +45,4 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    pagination_class = None

@@ -5,3 +5,5 @@ PyJWT
 djangorestframework-simplejwt
 django-filter
 djoser
+pyyaml
+uritemplate

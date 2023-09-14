@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'djoser',
-    'recipes.apps.RecipesConfig',
+    'recipes',
     'api.apps.ApiConfig',
 ]
 

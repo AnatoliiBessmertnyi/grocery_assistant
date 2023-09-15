@@ -36,9 +36,9 @@ class Recipe(models.Model):
         max_length=500,
         verbose_name='Описание',
     )
-    # image = models.ImageField(
-    #     upload_to='recipes/', null=True, blank=True
-    # )
+    image = models.ImageField(
+        upload_to='recipes/', null=True, blank=True
+    )
     pub_date = models.DateTimeField(
         'Дата публикации', auto_now_add=True
     )

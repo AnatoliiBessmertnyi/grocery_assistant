@@ -5,7 +5,26 @@ User = get_user_model()
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=64)
+    name = models.CharField(
+        'Название тэга',
+        max_length=50,
+        unique=True
+    )
+    # color = models.CharField(
+    #     'Название цвета',
+    #     max_length=20,
+    #     unique=True
+    # )
+    # slug = models.SlugField(
+    #     'Идентификатор тэга',
+    #     max_length=50,
+    #     unique=True
+    # )
+
+    class Meta:
+        verbose_name = 'Тэг'
+        verbose_name_plural = 'Тэги'
+        ordering = ['-id']
 
     def __str__(self):
         return self.name
@@ -24,7 +43,13 @@ class Recipe(models.Model):
         verbose_name='Название рецепта',
     )
     tags = models.TextField()
-    # tags = models.ManyToManyField(Tag, through='TagRecipe')
+    # tags = models.ManyToManyField(
+    #     Tag,
+    #     related_name='recipes',
+    #     blank=True,
+    #     verbose_name='Тэги',
+    # )
+
     ingredients = models.ManyToManyField(
         Ingredient, through='IngredientRecipe'
     )
@@ -50,12 +75,12 @@ class Recipe(models.Model):
         return self.name
 
 
-class TagRecipe(models.Model):
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+# class TagRecipe(models.Model):
+#     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+#     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return f'{self.tag} {self.recipe}'
+#     def __str__(self):
+#         return f'{self.tag} {self.recipe}'
 
 class IngredientRecipe(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)

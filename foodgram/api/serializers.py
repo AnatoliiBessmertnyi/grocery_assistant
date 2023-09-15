@@ -7,7 +7,12 @@ from rest_framework.validators import UniqueTogetherValidator
 
 
 from recipes.models import (
-    Recipe, Ingredient, IngredientRecipe, Tag, TagRecipe, User, Follow
+    Recipe,
+    Ingredient,
+    IngredientRecipe,
+    Tag,
+    User,
+    Follow,
 )
 
 
@@ -15,7 +20,6 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    recipes = serializers.StringRelatedField(read_only=True, many=True)
 
     class Meta:
         model = User

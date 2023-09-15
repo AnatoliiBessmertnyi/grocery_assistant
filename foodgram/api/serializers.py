@@ -2,10 +2,16 @@ import base64
 
 from rest_framework import serializers
 from django.core.files.base import ContentFile
+from django.contrib.auth import get_user_model
+from rest_framework.validators import UniqueTogetherValidator
+
 
 from recipes.models import (
-    Recipe, Ingredient, IngredientRecipe, Tag, TagRecipe, User
+    Recipe, Ingredient, IngredientRecipe, Tag, TagRecipe, User, Follow
 )
+
+
+User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -48,6 +54,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     # tags = TagSerializer(required=False)
     ingredients = IngredientSerializer(many=True)
     image = Base64ImageField(required=False, allow_null=True)
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True)
 
     class Meta:
         model = Recipe
@@ -111,3 +119,25 @@ class RecipeListSerializer(serializers.ModelSerializer):
         ) 
 
 
+class FollowSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True,
+        default=serializers.CurrentUserDefault()
+    )
+    following = serializers.SlugRelatedField(
+        slug_field='username', queryset=User.objects.all())
+
+    class Meta:
+        model = Follow
+        fields = ('user', 'following')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Follow.objects.all(), fields=('user', 'following')
+            )
+        ]
+
+    def validate(self, data):
+        if self.context['request'].user == data['following']:
+            raise serializers.ValidationError('Нельзя подписываться на себя!')
+        return data

@@ -1,13 +1,14 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, filters
+from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 
-from recipes.models import Recipe, Ingredient
 from .serializers import (
     RecipeSerializer, UserSerializer, RecipeListSerializer,
-    IngredientSerializer,
+    IngredientSerializer, FollowSerializer
 )
 from .permissions import AuthorOrReadOnly , ReadOnly
+from recipes.models import Recipe, Ingredient, Follow
 
 
 User = get_user_model()
@@ -46,3 +47,17 @@ class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
+
+
+class FollowViewSet(viewsets.ModelViewSet):
+    queryset = Follow.objects.all()
+    serializer_class = FollowSerializer
+    permission_classes = (IsAuthenticated,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('following__username',)
+
+    def get_queryset(self):
+        return self.request.user.follower.all()
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

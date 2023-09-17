@@ -1,9 +1,10 @@
 from django.contrib import admin
 
-from recipes.models import Recipe
+from .models import CustomUser
 
 
-@admin.register(Recipe)
-class RecipeAdmin(admin.ModelAdmin):
-    list_display = ("id", 'username', 'first_name', 'last_name')
-    search_fields = ("username",)
+@admin.register(CustomUser)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('id', 'username', 'first_name', 'last_name')
+    search_fields = ('username',)
+    empty_value_display = "-пусто-"

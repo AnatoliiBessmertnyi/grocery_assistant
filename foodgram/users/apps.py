@@ -1,19 +1,5 @@
-# from django.contrib import admin
-
-# from .models import CustomUser
+from django.apps import AppConfig
 
 
-# @admin.register(CustomUser)
-# class UserAdmin(admin.ModelAdmin):
-#     list_display = (
-#         "id",
-#         "username",
-#         "first_name",
-#         "last_name",
-#         "email",
-
-#     )
-#     search_fields = (
-#         "username",
-#     )
-#     empty_value_display = "-пусто-"
+class UsersConfig(AppConfig):
+    name = 'users'

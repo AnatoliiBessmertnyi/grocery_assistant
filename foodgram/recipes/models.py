@@ -1,10 +1,9 @@
-from django.contrib.auth import get_user_model
 from django.db import models
-
-User = get_user_model()
+from django.conf import settings
 
 
 class Tag(models.Model):
+    '''Модель тегов рецепта.'''
     name = models.CharField(
         'Название тэга',
         max_length=50,
@@ -31,6 +30,7 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
+    '''Модель ингредиентов рецепта.'''
     name = models.CharField(
         'Название ингредиента',
         max_length=50
@@ -50,11 +50,11 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
+    '''Модель рецепта.'''
     name = models.CharField(
         max_length=256,
         verbose_name='Название рецепта',
     )
-    # tags = models.TextField()
     tags = models.ManyToManyField(
         Tag,
         related_name='recipes',
@@ -68,7 +68,9 @@ class Recipe(models.Model):
         'Время приготовления рецепта'
     )
     author = models.ForeignKey(
-        User, related_name='recipes', on_delete=models.CASCADE
+        settings.AUTH_USER_MODEL,
+        related_name='recipes',
+        on_delete=models.CASCADE
     )
     description = models.TextField(
         verbose_name='Описание',
@@ -90,6 +92,8 @@ class Recipe(models.Model):
 
 
 class IngredientRecipe(models.Model):
+    '''Промежуточная модель для связи между рецептом и ингредиентом.
+    '''
     ingredient = models.ForeignKey(
         Ingredient, on_delete=models.CASCADE, related_name='ingredient'
     )
@@ -110,13 +114,14 @@ class IngredientRecipe(models.Model):
 
 
 class Follow(models.Model):
+    '''Модель подписок на автора.'''
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         related_name='follower',
         on_delete=models.CASCADE,
     )
     following = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         related_name='following',
         on_delete=models.CASCADE,
     )

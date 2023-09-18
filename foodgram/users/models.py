@@ -12,6 +12,8 @@ username_validator = RegexValidator(
 
 
 class CustomUser(AbstractUser):
+    '''Пользовательская модель пользователя с уникальным идентификатором
+    через email.'''
     username = models.CharField(
         verbose_name='Имя пользователя',
         unique=True,

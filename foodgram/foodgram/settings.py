@@ -23,9 +23,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'djoser',
-    'recipes',
-    'api',
-    # 'users',
+    'recipes.apps.RecipesConfig',
+    'api.apps.ApiConfig',
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [

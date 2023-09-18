@@ -4,14 +4,14 @@ from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .serializers import (
-    RecipeSerializer, 
-    UserSerializer, 
+    RecipeSerializer,
+    UserSerializer,
     RecipeListSerializer,
-    IngredientSerializer, 
-    FollowSerializer, 
+    IngredientSerializer,
+    FollowSerializer,
     TagSerializer,
 )
-from .permissions import AuthorOrReadOnly , ReadOnly
+from .permissions import AuthorOrReadOnly, ReadOnly
 from recipes.models import Recipe, Ingredient, Follow, Tag
 
 
@@ -30,14 +30,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return RecipeListSerializer
         return RecipeSerializer
-    
+
     def get_permissions(self):
         if self.action == 'retrieve':
             return (ReadOnly(),)
         return super().get_permissions()
-    
+
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user) 
+        serializer.save(author=self.request.user)
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):

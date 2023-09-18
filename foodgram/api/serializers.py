@@ -73,7 +73,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         # if 'tags' not in self.initial_data:
         #     recipe = Recipe.objects.create(**validated_data)
         #     return recipe
-        
+
     #     tags = validated_data.pop('tags')
     #     recipe = Recipe.objects.create(**validated_data)
     #     for tag in tags:
@@ -82,7 +82,6 @@ class RecipeSerializer(serializers.ModelSerializer):
     #             tag=current_tag, recipe=recipe
     #         )
     #     return recipe
-
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
@@ -95,7 +94,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 ingredient=current_ingredient, recipe=recipe
             )
         return recipe
-    
+
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.image = validated_data.get('image', instance.image)
@@ -111,16 +110,15 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
-    
 
 
 class RecipeListSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Recipe
         fields = (
-            'id', 'name', 'cooking_time','pub_date', 'author', 'tags'
-        ) 
+            'id', 'name', 'cooking_time', 'pub_date', 'author', 'tags'
+        )
 
 
 class FollowSerializer(serializers.ModelSerializer):

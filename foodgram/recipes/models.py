@@ -131,5 +131,5 @@ class FavoriteRecipe(models.Model):
     pass
 
 
-class ShoppingCar(models.Model):
+class ShoppingCart(models.Model):
     pass

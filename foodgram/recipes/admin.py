@@ -11,14 +11,34 @@ from .models import (
 )
 
 
+class IngredientRecipeAdmin(admin.StackedInline):
+    model = IngredientRecipe
+    list_display = ('recipe', 'ingredient', 'amount')
+
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'name', 'tags', 'ingredients', 'cooking_time', 'author',
+        'id', 'name', 'get_tags', 'get_ingredients', 'cooking_time', 'author',
         'description', 'pub_date'
     )
     search_fields = ('name',)
+    inlines = (IngredientRecipeAdmin,)
     empty_value_display = '-пусто-'
+
+    @admin.display(description='Тэги')
+    def get_tags(self, obj):
+        list_ = [_.name for _ in obj.tags.all()]
+        return ', '.join(list_)
+
+    @admin.display(description='Ингредиенты')
+    def get_ingredients(self, obj):
+        return '\n '.join([
+            f'{item["ingredient__name"]} - {item["amount"]}'
+            f' {item["ingredient__measure"]}.'
+            for item in obj.recipe.values(
+                'ingredient__name',
+                'amount', 'ingredient__measure')])
 
 
 @admin.register(Follow)
@@ -42,10 +62,6 @@ class IngredientAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-@admin.register(IngredientRecipe)
-class IngredientRecipeAdmin(admin.ModelAdmin):
-    list_display = ('recipe', 'ingredient', 'amount')
-    empty_value_display = '-пусто-'
 
 
 @admin.register(FavoriteRecipe)

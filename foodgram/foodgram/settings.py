@@ -131,8 +131,8 @@ SIMPLE_JWT = {
    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+# EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
 
-DEFAULT_FROM_EMAIL = "welcome@yamdb.com"
+# DEFAULT_FROM_EMAIL = "welcome@yamdb.com"

@@ -26,11 +26,11 @@ class Base64ImageField(serializers.ImageField):
 
 
 class TagSerializer(serializers.ModelSerializer):
-    tag_name = serializers.CharField(source='name')
+    # tag_name = serializers.CharField(source='name')
 
     class Meta:
         model = Tag
-        fields = ('id', 'tag_name', 'color', 'slug',)
+        fields = '__all__'
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -38,33 +38,29 @@ class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingredient
-        fields = (
-            'id',
-            'name',
-            'measure',
-        )
+        fields = '__all__'
 
 
-class IngredientM2MSerializer(serializers.ModelSerializer):
-    ingredient = serializers.PrimaryKeyRelatedField(
-        queryset=Ingredient.objects.all()
-    )
+class IngredientEditSerializer(serializers.ModelSerializer):
+
+    id = serializers.IntegerField()
+    amount = serializers.IntegerField()
 
     class Meta:
-        model = IngredientRecipe
+        model = Ingredient
         fields = (
             'id',
-            'name',
             'amount',
         )
-        read_only_fields = ('ingredient',)
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    # tags = TagSerializer(required=False)
-    ingredients = IngredientM2MSerializer(
+    tags = serializers.PrimaryKeyRelatedField(
         many=True,
-        source='ingredient_used',
+        queryset=Tag.objects.all(),
+    )
+    ingredients = IngredientEditSerializer(
+        many=True,
     )
     image = Base64ImageField(
         required=False,
@@ -77,81 +73,75 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = (
-            'name', 'cooking_time', 'ingredients', 'description',
-            'pub_date', 'author', 'tags', 'image',
-        )
+        fields = '__all__'
         read_only_fields = ('author',)
 
-    def create(self, validated_data):
-        ingredients = validated_data.pop('ingredient_used')
-        recipes = Recipe.objects.create(**validated_data)
-
+    def create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
-            current_ingredient = Ingredient.get('ingredient')
-            amount = ingredient.get('amount')
-            recipes.ingredients.add(
-                current_ingredient,
-                through_defaults={
-                    'amount': amount,
-                }
+            IngredientRecipe.objects.create(
+                recipe=recipe,
+                ingredient_id=ingredient.get('id'),
+                amount=ingredient.get('amount'),
             )
 
-        return recipes
+    def create(self, validated_data):
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        recipe = Recipe.objects.create(**validated_data)
+        recipe.tags.set(tags)
+        self.create_ingredients(ingredients, recipe)
+        return recipe
 
     def update(self, instance, validated_data):
-        instance.name = validated_data.get('name', instance.name)
-        instance.image = validated_data.get('image', instance.image)
         if 'ingredients' in validated_data:
-            ingredients_data = validated_data.pop('ingredient_used')
-            lst = []
-            for ingredient in ingredients_data:
-                current_ingredient, status = ingredient.objects.get_or_create(
-                    **ingredient
-                    )
-                lst.append(current_ingredient)
-            instance.ingredients.set(lst)
-
-        instance.save()
-        return instance
+            ingredients = validated_data.pop('ingredients')
+            instance.ingredients.clear()
+            self.create_ingredients(ingredients, instance)
+        if 'tags' in validated_data:
+            instance.tags.set(
+                validated_data.pop('tags'))
+        return super().update(
+            instance, validated_data)
+    
+    def to_representation(self, instance):
+        return RecipeListSerializer(
+            instance,
+            context={
+                'request': self.context.get('request')
+            }
+        ).data
 
 
 class RecipeIngredientsListSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(
-        source='ingredient.id',
+    id = serializers.ReadOnlyField(
+        source='ingredient.id'
     )
-    name = serializers.CharField(
-        source='ingredient.name',
+    name = serializers.ReadOnlyField(
+        source='ingredient.name'
     )
-    amount = serializers.ReadOnlyField()
+    measure = serializers.ReadOnlyField(
+        source='ingredient.measure'
+    )
 
     class Meta:
         model = IngredientRecipe
         fields = (
             'id',
             'name',
+            'measure',
             'amount',
-            # 'ingredient',
         )
 
 
 class RecipeListSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientsListSerializer(
-        source='ingredients_used',
+        source='recipe',
         many=True,
     )
 
     class Meta:
         model = Recipe
-        fields = (
-            'id',
-            'name',
-            'cooking_time',
-            'pub_date',
-            'author',
-            'tags',
-            'ingredients',
-        )
+        fields = '__all__'
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -204,26 +194,26 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("username", "email")
+        fields = ('username', 'email')
 
     def validate(self, data):
-        username = data["username"]
-        email = data["email"]
+        username = data['username']
+        email = data['email']
         email_exists = User.objects.filter(email=email).exists()
         username_exists = User.objects.filter(username=username).exists()
-        if username.lower() == "me":
+        if username.lower() == 'me':
             raise serializers.ValidationError(
                 f'Имя пользователя "{username}" недоступно.',
             )
-        if not re.match(r"^[\w.@+-]+$", username):
-            raise serializers.ValidationError("Некорректный формат логина")
+        if not re.match(r'^[\w.@+-]+$', username):
+            raise serializers.ValidationError('Некорректный формат логина')
         if username_exists and not email_exists:
             raise serializers.ValidationError(
-                "Пользователь заренистрирован с другой почтой"
+                'Пользователь заренистрирован с другой почтой'
             )
         if email_exists and not username_exists:
             raise serializers.ValidationError(
-                "Пользователь заренистрирован с другим логином"
+                'Пользователь заренистрирован с другим логином'
             )
         return data
 
@@ -235,8 +225,8 @@ class TokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            "username",
-            # "confirmation_code",
+            'username',
+            # 'confirmation_code',
         )
 
 

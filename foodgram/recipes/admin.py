@@ -13,14 +13,22 @@ from .models import (
 
 class IngredientRecipeAdmin(admin.StackedInline):
     model = IngredientRecipe
-    list_display = ('recipe', 'ingredient', 'amount')
+    list_display = (
+        'amount',
+    )
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'name', 'get_tags', 'get_ingredients', 'cooking_time', 'author',
-        'description', 'pub_date'
+        'id',
+        'name',
+        'get_tags',
+        'get_ingredients',
+        'cooking_time',
+        'author',
+        'description',
+        'pub_date',
     )
     search_fields = ('name',)
     inlines = (IngredientRecipeAdmin,)
@@ -38,30 +46,43 @@ class RecipeAdmin(admin.ModelAdmin):
             f' {item["ingredient__measure"]}.'
             for item in obj.recipe.values(
                 'ingredient__name',
-                'amount', 'ingredient__measure')])
+                'amount',
+                'ingredient__measure',
+            )])
 
 
 @admin.register(Follow)
 class FollowAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'following')
+    list_display = (
+        'id',
+        'user',
+        'following',
+    )
     search_fields = ('user',)
     empty_value_display = '-пусто-'
 
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'color', 'slug')
+    list_display = (
+        'id',
+        'name',
+        'color',
+        'slug',
+    )
     search_fields = ('name',)
     empty_value_display = '-пусто-'
 
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'measure')
+    list_display = (
+        'id',
+        'name',
+        'measure',
+    )
     search_fields = ('name',)
     empty_value_display = '-пусто-'
-
-
 
 
 @admin.register(FavoriteRecipe)

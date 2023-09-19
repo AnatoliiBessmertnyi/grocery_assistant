@@ -10,7 +10,6 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from users.models import CustomUser as User
 
-from .permissions import IsAdmin
 from .serializers import (
     FollowSerializer,
     IngredientSerializer,
@@ -26,8 +25,7 @@ from .serializers import (
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
 
 # Вывод информации на главной и в подробностях рецепта разный
@@ -73,7 +71,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     http_method_names = ['get', 'post', 'patch', 'delete']
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     lookup_field = 'username'
@@ -101,13 +99,13 @@ class UserSignUpView(views.APIView):
     def post(self, request, *args, **kwargs):
         serializer = UserCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data.get("email")
-        username = serializer.validated_data["username"]
+        email = serializer.validated_data.get('email')
+        username = serializer.validated_data['username']
         user, _ = User.objects.get_or_create(email=email, username=username)
         confirmation_code = default_token_generator.make_token(user)
         send_mail(
-            subject="Код подтверждения",
-            message=f"Ваш код подтверждения: {confirmation_code}",
+            subject='Код подтверждения',
+            message=f'Ваш код подтверждения: {confirmation_code}',
             from_email=None,
             recipient_list=(user.email,),
         )
@@ -120,12 +118,12 @@ class TokenView(views.APIView):
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        username = serializer.data["username"]
+        username = serializer.data['username']
         user = get_object_or_404(User, username=username)
-        # confirmation_code = serializer.data["confirmation_code"]
+        # confirmation_code = serializer.data['confirmation_code']
         # if not default_token_generator.check_token(user, confirmation_code):
         #     raise ValidationError(serializer.errors)
         token = AccessToken.for_user(user)
         data = {}
-        data["token"] = str(token)
+        data['token'] = str(token)
         return Response(data, status=status.HTTP_200_OK)

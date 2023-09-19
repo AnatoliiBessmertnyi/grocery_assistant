@@ -52,17 +52,15 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     '''Модель рецепта.'''
     name = models.CharField(
+        'Название рецепта',
         max_length=256,
-        verbose_name='Название рецепта',
     )
     tags = models.ManyToManyField(
         Tag,
         related_name='recipes',
-        blank=True,
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        related_name='recipes',
         through='IngredientRecipe',
     )
     cooking_time = models.IntegerField(
@@ -101,12 +99,12 @@ class IngredientRecipe(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='ingredient_used',
+        related_name='recipe',
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='recipe_used',
+        related_name='ingredient',
     )
     amount = models.IntegerField(
         'Количество ингредиентов',

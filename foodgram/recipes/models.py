@@ -59,13 +59,14 @@ class Recipe(models.Model):
         Tag,
         related_name='recipes',
         blank=True,
-        verbose_name='Тэги',
     )
     ingredients = models.ManyToManyField(
-        Ingredient, through='IngredientRecipe'
+        Ingredient,
+        related_name='recipes',
+        through='IngredientRecipe',
     )
     cooking_time = models.IntegerField(
-        'Время приготовления рецепта'
+        'Время приготовления рецепта в минутах',
     )
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -73,13 +74,16 @@ class Recipe(models.Model):
         on_delete=models.CASCADE
     )
     description = models.TextField(
-        verbose_name='Описание',
+        'Описание рецпта',
     )
     image = models.ImageField(
-        upload_to='recipes/', null=True, blank=True
+        upload_to='recipes/',
+        null=True,
+        blank=True,
     )
     pub_date = models.DateTimeField(
-        'Дата публикации', auto_now_add=True
+        'Дата публикации',
+        auto_now_add=True,
     )
 
     class Meta:
@@ -94,14 +98,18 @@ class Recipe(models.Model):
 class IngredientRecipe(models.Model):
     '''Промежуточная модель для связи между рецептом и ингредиентом.
     '''
-    ingredient = models.ForeignKey(
-        Ingredient, on_delete=models.CASCADE, related_name='ingredient'
-    )
     recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE, related_name='recipe'
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='ingredient_used',
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name='recipe_used',
     )
     amount = models.IntegerField(
-        'Количество ингредиентов'
+        'Количество ингредиентов',
     )
 
     class Meta:
@@ -110,7 +118,7 @@ class IngredientRecipe(models.Model):
         ordering = ['-id']
 
     def __str__(self):
-        return f'{self.ingredient} {self.recipe}'
+        return self.amount
 
 
 class Follow(models.Model):

@@ -21,10 +21,14 @@ class CustomUser(AbstractUser):
         validators=[username_validator],
     )
     first_name = models.CharField(
-        verbose_name='Имя', max_length=150, blank=True
+        verbose_name='Имя',
+        max_length=150,
+        blank=True,
     )
     last_name = models.CharField(
-        verbose_name='Фамилия', max_length=150, blank=True
+        verbose_name='Фамилия',
+        max_length=150,
+        blank=True,
     )
     email = models.EmailField(
         verbose_name='Электронная почта',

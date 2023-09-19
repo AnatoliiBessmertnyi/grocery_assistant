@@ -7,3 +7,4 @@ django-filter
 djoser
 pyyaml
 uritemplate
+django-cors-headers

@@ -11,7 +11,7 @@ class Tag(models.Model):
     )
     color = models.CharField(
         'Название цвета',
-        max_length=20,
+        max_length=7,
         unique=True
     )
     slug = models.SlugField(
@@ -46,7 +46,7 @@ class Ingredient(models.Model):
         ordering = ['name']
 
     def __str__(self):
-        return f'{self.name} {self.measure}'
+        return {self.name}
 
 
 class Recipe(models.Model):
@@ -94,8 +94,7 @@ class Recipe(models.Model):
 
 
 class IngredientRecipe(models.Model):
-    '''Промежуточная модель для связи между рецептом и ингредиентом.
-    '''
+    '''Промежуточная модель для связи между рецептом и ингредиентом.'''
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -116,7 +115,7 @@ class IngredientRecipe(models.Model):
         ordering = ['-id']
 
     def __str__(self):
-        return self.amount
+        return f'{self.recipe} {self.ingredient}'
 
 
 class Follow(models.Model):
@@ -137,10 +136,45 @@ class Follow(models.Model):
         verbose_name_plural = 'Подписки'
         ordering = ['-id']
 
+    def __str__(self):
+        return f'{self.user} {self.following}'
+
 
 class FavoriteRecipe(models.Model):
-    pass
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='favoriter',
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='favoriting',
+    )
+
+    class Meta:
+        verbose_name = 'Список покупок'
+        verbose_name_plural = 'Списки покупок'
+
+    def __str__(self):
+        return f'{self.user} {self.recipe}'
 
 
 class ShoppingCart(models.Model):
-    pass
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='buyer',
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='buying',
+    )
+
+    class Meta:
+        verbose_name = 'Список покупок'
+        verbose_name_plural = 'Списки покупок'
+
+    def __str__(self):
+        return f'{self.user} {self.recipe}'

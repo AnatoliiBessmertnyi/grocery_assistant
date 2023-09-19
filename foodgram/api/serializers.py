@@ -102,7 +102,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 validated_data.pop('tags'))
         return super().update(
             instance, validated_data)
-    
+
     def to_representation(self, instance):
         return RecipeListSerializer(
             instance,

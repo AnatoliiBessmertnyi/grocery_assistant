@@ -204,36 +204,40 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'email')
+        fields = ("username", "email")
 
     def validate(self, data):
-        username = data['username']
-        email = data['email']
+        username = data["username"]
+        email = data["email"]
         email_exists = User.objects.filter(email=email).exists()
         username_exists = User.objects.filter(username=username).exists()
-        if username.lower() == 'me':
+        if username.lower() == "me":
             raise serializers.ValidationError(
                 f'Имя пользователя "{username}" недоступно.',
             )
-        if not re.match(r'^[\w.@+-]+$', username):
-            raise serializers.ValidationError('Некорректный формат логина')
+        if not re.match(r"^[\w.@+-]+$", username):
+            raise serializers.ValidationError("Некорректный формат логина")
         if username_exists and not email_exists:
             raise serializers.ValidationError(
-                'Пользователь зарегистрирован с другой почтой'
+                "Пользователь заренистрирован с другой почтой"
             )
         if email_exists and not username_exists:
             raise serializers.ValidationError(
-                'Пользователь зарегистрирован с другим логином'
+                "Пользователь заренистрирован с другим логином"
             )
         return data
 
 
 class TokenSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=True)
+    # confirmation_code = serializers.CharField(required=True)
 
     class Meta:
         model = User
-        fields = ('username',)
+        fields = (
+            "username",
+            # "confirmation_code",
+        )
 
 
 class ProfileEditSerializer(UserSerializer):

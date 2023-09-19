@@ -20,6 +20,11 @@ class CustomUser(AbstractUser):
         max_length=150,
         validators=[username_validator],
     )
+    email = models.EmailField(
+        verbose_name='Электронная почта',
+        unique=True,
+        max_length=254,
+    )
     first_name = models.CharField(
         verbose_name='Имя',
         max_length=150,
@@ -30,11 +35,6 @@ class CustomUser(AbstractUser):
         max_length=150,
         blank=True,
     )
-    email = models.EmailField(
-        verbose_name='Электронная почта',
-        unique=True,
-        max_length=150,
-    )
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
@@ -43,6 +43,10 @@ class CustomUser(AbstractUser):
         ordering = ['id']
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+    @property
+    def is_admin(self):
+        return self.is_superuser
 
     def __str__(self):
         return self.email

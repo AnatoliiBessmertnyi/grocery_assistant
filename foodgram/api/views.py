@@ -30,7 +30,7 @@ from .serializers import (
 
 
 def custom_post_delete(self, request, pk, model):
-    """Функция-обработчик POST, DELETE запросов """
+    '''Функция-обработчик POST, DELETE запросов '''
     user = self.request.user
     recipe = self.get_object()
     if request.method == 'DELETE':

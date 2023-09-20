@@ -8,14 +8,19 @@ from .models import (
     Recipe,
     ShoppingCart,
     Tag,
+    TagRecipe,
 )
 
 
 class IngredientRecipeAdmin(admin.StackedInline):
     model = IngredientRecipe
     list_display = (
-        'amount',
+        'measure',
     )
+
+
+class TagRecipeAdmin(admin.StackedInline):
+    model = TagRecipe
 
 
 @admin.register(Recipe)
@@ -31,7 +36,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'pub_date',
     )
     search_fields = ('name',)
-    inlines = (IngredientRecipeAdmin,)
+    inlines = (IngredientRecipeAdmin, TagRecipeAdmin,)
     empty_value_display = '-пусто-'
 
     @admin.display(description='Тэги')
@@ -77,7 +82,6 @@ class TagAdmin(admin.ModelAdmin):
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
         'name',
         'measure',
     )
@@ -85,5 +89,6 @@ class IngredientAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-admin.site.register(ShoppingCart)
 admin.site.register(FavoriteRecipe)
+admin.site.register(IngredientRecipe)
+admin.site.register(ShoppingCart)

@@ -3,10 +3,12 @@ import re
 
 from django.core.files.base import ContentFile
 from recipes.models import (
+    FavoriteRecipe,
     Follow,
     Ingredient,
     IngredientRecipe,
     Recipe,
+    ShoppingCart,
     Tag,
 )
 from rest_framework import serializers
@@ -145,6 +147,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
+    """Сериализатор подписки на автора."""
     user = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True,
@@ -169,6 +172,58 @@ class FollowSerializer(serializers.ModelSerializer):
         if self.context['request'].user == data['following']:
             raise serializers.ValidationError('Нельзя подписываться на себя!')
         return data
+
+
+class FavoriteRecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор добавления рецепта в избранное."""
+
+    class Meta:
+        model = FavoriteRecipe
+        fields = '__all__'
+
+        validators = [
+            UniqueTogetherValidator(
+                queryset=FavoriteRecipe.objects.all(),
+                fields=('user', 'recipe'),
+                message='Этот рецепт Вы уже добавили в список избранных.',
+            )
+        ]
+
+
+class FavoriteShoppingSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор  рецептов, находящихся в списке избранного и списке покупок.
+    """
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time',
+        )
+        read_only_fields = (
+            'name',
+            'image',
+            'cooking_time',
+        )
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    """Сериализатор добавления рецепта в список покупок."""
+
+    class Meta:
+        model = ShoppingCart
+        fields = '__all__'
+
+        validators = [
+            UniqueTogetherValidator(
+                queryset=ShoppingCart.objects.all(),
+                fields=('user', 'recipe'),
+                message='Этот рецепт Вы уже добавили в список покупок.',
+            )
+        ]
 
 
 class UserSerializer(serializers.ModelSerializer):

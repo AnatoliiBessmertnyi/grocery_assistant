@@ -74,14 +74,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
     @action(
-        methods=['post', 'delete'], detail=True,
+        methods=['POST', 'DELETE'], detail=True,
     )
     def favorite(self, request, pk):
         model = FavoriteRecipe
         return custom_post_delete(self, request, pk, model)
 
     @action(
-        methods=['post', 'delete'], detail=True,
+        methods=['POST', 'DELETE'], detail=True,
     )
     def shopping_cart(self, request, pk):
         model = ShoppingCart
@@ -101,6 +101,7 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
+    permission_classes = (permissions.AllowAny,)
 
 
 class FollowViewSet(viewsets.ModelViewSet):

@@ -18,6 +18,7 @@ from users.models import CustomUser as User
 
 
 class Base64ImageField(serializers.ImageField):
+    '''Сериализатор декодирования изображений.'''
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')
@@ -27,19 +28,21 @@ class Base64ImageField(serializers.ImageField):
 
 
 class TagSerializer(serializers.ModelSerializer):
+    '''Сериализатор тэгов.'''
     class Meta:
         model = Tag
         fields = '__all__'
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-
+    '''Сериализатор ингредиентов.'''
     class Meta:
         model = Ingredient
         fields = '__all__'
 
 
 class IngredientEditSerializer(serializers.ModelSerializer):
+    '''Сериализатор сохранения ингредиентов в рецепте.'''
     id = serializers.IntegerField()
     amount = serializers.IntegerField()
 
@@ -52,6 +55,7 @@ class IngredientEditSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientsListSerializer(serializers.ModelSerializer):
+    '''Сериализатор ингредиентов промежуточной модели.'''
     id = serializers.ReadOnlyField(
         source='ingredient.id'
     )
@@ -73,6 +77,7 @@ class RecipeIngredientsListSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
+    '''Сериализатор создания и редактирования рецептов.'''
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Tag.objects.all(),
@@ -137,6 +142,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeListSerializer(serializers.ModelSerializer):
+    '''Сериализатор списка рецептов.'''
     ingredients = RecipeIngredientsListSerializer(
         source='recipe',
         many=True,
@@ -160,7 +166,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    """Сериализатор подписки на автора."""
+    '''Сериализатор подписки на автора.'''
     user = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True,
@@ -188,7 +194,7 @@ class FollowSerializer(serializers.ModelSerializer):
 
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор добавления рецепта в избранное."""
+    '''Сериализатор добавления рецепта в избранное.'''
 
     class Meta:
         model = FavoriteRecipe
@@ -204,6 +210,7 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
 
 
 class FavoriteShoppingSerializer(serializers.ModelSerializer):
+    '''Сериализатор рецептов в избранном и в корзине одновременно.'''
 
     class Meta:
         model = Recipe
@@ -285,15 +292,11 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 class TokenSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=True)
-    # confirmation_code = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(required=True)
 
     class Meta:
         model = User
         fields = (
             'username',
-            # 'confirmation_code',
+            'confirmation_code',
         )
-
-
-class ProfileEditSerializer(UserSerializer):
-    role = serializers.CharField(read_only=True)

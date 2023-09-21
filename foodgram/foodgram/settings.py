@@ -11,7 +11,7 @@ DEBUG = True
 
 # if os.getenv('ALLOWED_HOSTS') is not None:
 #     ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -21,7 +21,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    # 'rest_framework.authtoken',
     'django_filters',
     'djoser',
     'recipes.apps.RecipesConfig',

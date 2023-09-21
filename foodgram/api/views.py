@@ -7,7 +7,7 @@ from rest_framework import (
     filters, permissions, serializers, status, views, viewsets
 )
 from rest_framework.decorators import action
-# from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
@@ -171,9 +171,9 @@ class TokenView(views.APIView):
         serializer.is_valid(raise_exception=True)
         username = serializer.data['username']
         user = get_object_or_404(User, username=username)
-        # confirmation_code = serializer.data['confirmation_code']
-        # if not default_token_generator.check_token(user, confirmation_code):
-        #     raise ValidationError(serializer.errors)
+        confirmation_code = serializer.data['confirmation_code']
+        if not default_token_generator.check_token(user, confirmation_code):
+            raise ValidationError(serializer.errors)
         token = AccessToken.for_user(user)
         data = {}
         data['token'] = str(token)

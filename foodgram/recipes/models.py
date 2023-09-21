@@ -118,11 +118,11 @@ class IngredientRecipe(models.Model):
 
 
 class TagRecipe(models.Model):
-    '''Промежуточная модель для связи между тегом и рецептом.'''
+    '''Промежуточная модель для связи между тэгом и рецептом.'''
     tag = models.ForeignKey(
         Tag,
         on_delete=models.CASCADE,
-        verbose_name='Тег'
+        verbose_name='Тэг'
     )
     recipe = models.ForeignKey(
         Recipe,
@@ -131,8 +131,8 @@ class TagRecipe(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Тег и рецепт'
-        verbose_name_plural = 'Теги b рецепты'
+        verbose_name = 'Тэг и рецепт'
+        verbose_name_plural = 'Тэги и рецепты'
 
     def __str__(self):
         return f'{self.tag} {self.recipe}'

@@ -11,7 +11,7 @@ DEBUG = True
 
 # if os.getenv('ALLOWED_HOSTS') is not None:
 #     ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '51.250.110.193',]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -130,8 +130,8 @@ SIMPLE_JWT = {
    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 
-# EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
 
-# DEFAULT_FROM_EMAIL = "welcome@yamdb.com"
+DEFAULT_FROM_EMAIL = "welcome@yamdb.com"

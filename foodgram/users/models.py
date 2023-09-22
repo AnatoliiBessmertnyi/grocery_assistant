@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
@@ -12,28 +13,28 @@ username_validator = RegexValidator(
 
 
 class CustomUser(AbstractUser):
-    '''Пользовательская модель пользователя с уникальным идентификатором
-    через email.'''
+    """Пользовательская модель пользователя с уникальным идентификатором
+    через email."""
     username = models.CharField(
-        verbose_name='Имя пользователя',
         unique=True,
-        max_length=150,
+        max_length=settings.MAX_LENGHT,
         validators=[username_validator],
+        verbose_name='Имя пользователя',
     )
     email = models.EmailField(
-        verbose_name='Электронная почта',
         unique=True,
-        max_length=254,
+        max_length=settings.MAX_LENGHT,
+        verbose_name='Электронная почта',
     )
     first_name = models.CharField(
-        verbose_name='Имя',
-        max_length=150,
+        max_length=settings.MAX_LENGHT,
         blank=True,
+        verbose_name='Имя',
     )
     last_name = models.CharField(
-        verbose_name='Фамилия',
-        max_length=150,
+        max_length=settings.MAX_LENGHT,
         blank=True,
+        verbose_name='Фамилия',
     )
 
     USERNAME_FIELD = 'email'

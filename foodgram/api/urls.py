@@ -6,6 +6,8 @@ from .views import (
     IngredientViewSet,
     RecipeViewSet,
     TagViewSet,
+)
+from .user_views import (
     TokenView,
     UserSignUpView,
     UserViewSet,

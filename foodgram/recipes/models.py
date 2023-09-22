@@ -3,21 +3,21 @@ from django.conf import settings
 
 
 class Tag(models.Model):
-    '''Модель тегов рецепта.'''
+    """Модель тегов рецепта."""
     name = models.CharField(
-        'Название тэга',
-        max_length=50,
-        unique=True
+        max_length=settings.MAX_LENGHT,
+        unique=True,
+        verbose_name='Название',
     )
     color = models.CharField(
-        'Название цвета',
-        max_length=7,
-        unique=True
+        max_length=50,
+        unique=True,
+        verbose_name='Цвет',
     )
     slug = models.SlugField(
-        'Идентификатор тэга',
-        max_length=50,
-        unique=True
+        max_length=settings.MAX_LENGHT,
+        unique=True,
+        verbose_name='Идентификатор',
     )
 
     class Meta:
@@ -30,14 +30,15 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
-    '''Модель ингредиентов рецепта.'''
+    """Модель ингредиентов рецепта."""
     name = models.CharField(
-        'Название ингредиента',
-        max_length=50
+        max_length=settings.MAX_LENGHT,
+        verbose_name='Название',
     )
     measure = models.CharField(
-        'Единица измерения',
-        max_length=50
+        max_length=settings.MAX_LENGHT,
+        verbose_name='Единица измерения',
+        
     )
 
     class Meta:
@@ -50,38 +51,44 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
-    '''Модель рецепта.'''
+    """Модель рецепта."""
     name = models.CharField(
-        'Название рецепта',
-        max_length=256,
+        max_length=settings.MAX_LENGHT,
+        verbose_name='Название',
+
     )
     tags = models.ManyToManyField(
         Tag,
         through='TagRecipe',
+        verbose_name='Тэг',
+
     )
     ingredients = models.ManyToManyField(
         Ingredient,
         through='IngredientRecipe',
+        verbose_name='Ингредиент',
     )
     cooking_time = models.IntegerField(
-        'Время приготовления рецепта в минутах',
+        verbose_name='Время приготовления рецепта в минутах',
     )
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name='recipes',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        verbose_name='Автор',
     )
     description = models.TextField(
-        'Описание рецпта',
+        verbose_name='Описание',
     )
     image = models.ImageField(
         upload_to='recipes/',
         null=True,
         blank=True,
+        verbose_name='Картинка',
     )
     pub_date = models.DateTimeField(
-        'Дата публикации',
         auto_now_add=True,
+        verbose_name='Дата публикации',
     )
 
     class Meta:
@@ -94,19 +101,21 @@ class Recipe(models.Model):
 
 
 class IngredientRecipe(models.Model):
-    '''Промежуточная модель для связи между рецептом и ингредиентом.'''
+    """Промежуточная модель для связи между рецептом и ингредиентом."""
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name='recipe',
+        verbose_name='Рецепт',
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
         related_name='ingredient',
+        verbose_name='Ингредиент',
     )
     amount = models.IntegerField(
-        'Количество ингредиентов',
+        verbose_name='Количество ингредиентов',
     )
 
     class Meta:
@@ -118,7 +127,7 @@ class IngredientRecipe(models.Model):
 
 
 class TagRecipe(models.Model):
-    '''Промежуточная модель для связи между тэгом и рецептом.'''
+    """Промежуточная модель для связи между тэгом и рецептом."""
     tag = models.ForeignKey(
         Tag,
         on_delete=models.CASCADE,
@@ -139,16 +148,18 @@ class TagRecipe(models.Model):
 
 
 class Follow(models.Model):
-    '''Модель подписок на автора.'''
+    """Модель подписок на автора."""
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name='follower',
         on_delete=models.CASCADE,
+        verbose_name='Подписчик',
     )
     following = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name='following',
         on_delete=models.CASCADE,
+        verbose_name='Автор',
     )
 
     class Meta:
@@ -161,16 +172,18 @@ class Follow(models.Model):
 
 
 class FavoriteRecipe(models.Model):
-    '''Модель избранных рецептов.'''
+    """Модель избранных рецептов."""
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='favoriter',
+        verbose_name='Пользователь',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name='favoriting',
+        verbose_name='Рецепт',
     )
 
     class Meta:
@@ -182,16 +195,18 @@ class FavoriteRecipe(models.Model):
 
 
 class ShoppingCart(models.Model):
-    '''Модель корзины.'''
+    """Модель корзины."""
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='buyer',
+        verbose_name='Пользователь',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name='buying',
+        verbose_name='Рецепт',
     )
 
     class Meta:

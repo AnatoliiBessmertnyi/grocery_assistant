@@ -1,11 +1,20 @@
+import os
+import sys
+
+from django.conf import settings
+from django.db.models import Sum
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from xhtml2pdf.files import pisaFileObject
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import Follow, Ingredient, Recipe, Tag
 from rest_framework import (
     filters, permissions, serializers, status, viewsets
 )
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from recipes.models import Follow, Ingredient, Recipe, Tag
 from recipes.models import FavoriteRecipe, ShoppingCart
 from .serializers import (
     FavoriteRecipeSerializer,
@@ -77,7 +86,46 @@ class RecipeViewSet(viewsets.ModelViewSet):
         model = ShoppingCart
         return custom_post_delete(self, request, pk, model)
 
-# Тут нужно реализовать скачивание рецептов в пдф формате
+    def link_callback(url, rel):
+        if url.find(settings.MEDIA_URL) != -1:
+            path = os.path.join(
+                settings.MEDIA_ROOT, url.replace(settings.MEDIA_URL, '')
+            )
+        elif url.find(settings.STATIC_URL) != -1:
+            path = os.path.join(
+                settings.STATIC_ROOT, url.replace(settings.STATIC_URL, '')
+            )
+        return path or None
+
+    def html_to_pdf(self, template, context):
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'filename="shopping_cart.pdf"'
+        template = get_template(template)
+        html = template.render(context)
+        if sys.platform == 'win32':
+            pisaFileObject.getNamedFile = (
+                lambda self: settings.STATIC_ROOT
+                + self.url.replace(settings.STATIC_URL, '\\')
+            )
+        pdf = pisa.CreatePDF(
+            html, dest=response,
+            encoding='utf-8',
+            link_callback=self.link_callback,
+        )
+        if not pdf.err:
+            return response
+        return None
+
+    @action(
+        methods=['GET'], detail=False,
+    )
+    def download_shopping_cart(self, request):
+        user = self.request.user
+        context = user.buyer.values(
+            'recipe__ingredients__name',
+            'recipe__ingredients__measure'
+        ).annotate(total=Sum('recipe__ingredientrecipe__amount'))
+        return self.html_to_pdf('carttopdf.html', {'context': context})
 
 
 class IngredientViewSet(viewsets.ModelViewSet):

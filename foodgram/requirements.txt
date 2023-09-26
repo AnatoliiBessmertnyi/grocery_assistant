@@ -8,3 +8,5 @@ djoser
 pyyaml
 uritemplate
 django-cors-headers
+xhtml2pdf
+psycopg2-binary

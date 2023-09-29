@@ -14,9 +14,7 @@ services:
       - pg_data:/var/lib/postgresql/data/
 
   backend:
-    build:
-      context: ../foodgram
-      dockerfile: Dockerfile
+    image: hegem0n/foodgram_backend
     env_file: ../.env
     restart: always
     volumes:
@@ -26,9 +24,7 @@ services:
       - db
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: hegem0n/foodgram_frontend
     env_file: ../.env
     volumes:
       - ../frontend/:/app/result_build/

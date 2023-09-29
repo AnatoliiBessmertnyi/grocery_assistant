@@ -1,0 +1,20 @@
+login: yc-user
+passphrase: NRjeSf
+ip: 51.250.110.193
+
+ssh -i /c/Dev/vm_access/yc-noob1917ru yc-user@51.250.110.193
+
+sudo cp -r /home/yc-user/infra_sprint1/frontend/build/. /var/www/kittygram/ # копирование статики фронта 
+sudo chown -R yc-user /var/www/kittygram/media/
+sudo cp -r /home/yc-user/infra_sprint1/backend/static_backend/ /var/www/kittygram/ 
+myfirstprojectinyp.hopto.org
+sudo cp -r /etc/nginx/sites-enabled/default /home/yc-user/infra_sprint1/infra/
+sudo cp -r /etc/systemd/system/gunicorn_kittygram.service /home/yc-user/infra_sprint1/infra/
+django-insecure-cg6*%6d51ef8f#4!r3*$vmxmcd 4)abgjw8mo!4y-q*uq1!4$-89$
+/var/www/kittygram/
+
+SECRET_KEY = 'django-insecure-cg6*%6d51ef8f#4!r3*$vmxm4)abgjw8mo!4y-q*uq1!4$-89$'
+ALLOWED_HOSTS = ['51.250.110.193', '127.0.0.1', 'localhost', 'kittyfromanatolii.hopto.org']
+
+if os.getenv('ALLOWED_HOSTS') is not None:
+    ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')

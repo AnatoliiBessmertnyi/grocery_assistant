@@ -7,11 +7,7 @@ from .views import (
     RecipeViewSet,
     TagViewSet,
 )
-from .user_views import (
-    # TokenView,
-    # UserSignUpView,
-    UserViewSet,
-)
+from .user_views import UserViewSet
 
 router = DefaultRouter()
 router.register('recipes', RecipeViewSet, basename='recipes')
@@ -24,6 +20,4 @@ urlpatterns = [
     path('', include(router.urls)),
     path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
-    # path('auth/signup/', UserSignUpView.as_view(), name='signup'),
-    # path('auth/token/', TokenView.as_view(), name='get_token'),
 ]

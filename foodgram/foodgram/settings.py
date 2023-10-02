@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'django_filters',
     'djoser',
     'recipes.apps.RecipesConfig',
@@ -115,7 +116,7 @@ REST_FRAMEWORK = {
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ],
 
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
@@ -123,11 +124,14 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 6,
 }
 
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=365),
-    'AUTH_HEADER_TYPES': ('Bearer',),
+DJOSER = {
+    'LOGIN_FIELD': 'email',
 }
+
+# SIMPLE_JWT = {
+#     'ACCESS_TOKEN_LIFETIME': timedelta(days=365),
+#     'AUTH_HEADER_TYPES': ('Bearer',),
+# }
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 

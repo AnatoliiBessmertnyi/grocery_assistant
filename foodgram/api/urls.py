@@ -8,8 +8,8 @@ from .views import (
     TagViewSet,
 )
 from .user_views import (
-    TokenView,
-    UserSignUpView,
+    # TokenView,
+    # UserSignUpView,
     UserViewSet,
 )
 
@@ -22,6 +22,8 @@ router.register('tags', TagViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('auth/signup/', UserSignUpView.as_view(), name='signup'),
-    path('auth/token/', TokenView.as_view(), name='get_token'),
+    path('', include('djoser.urls')),
+    path('auth/', include('djoser.urls.authtoken')),
+    # path('auth/signup/', UserSignUpView.as_view(), name='signup'),
+    # path('auth/token/', TokenView.as_view(), name='get_token'),
 ]

@@ -305,7 +305,3 @@ class TokenSerializer(serializers.ModelSerializer):
             'username',
             'confirmation_code',
         )
-
-
-class ProfileEditSerializer(UserSerializer):
-    role = serializers.CharField(read_only=True)

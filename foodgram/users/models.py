@@ -13,8 +13,7 @@ username_validator = RegexValidator(
 
 
 class CustomUser(AbstractUser):
-    """Пользовательская модель пользователя с уникальным идентификатором
-    через email."""
+    """Пользовательская модель пользователя с уникальным идентификатором."""
     username = models.CharField(
         unique=True,
         max_length=settings.MAX_LENGHT,
@@ -45,9 +44,6 @@ class CustomUser(AbstractUser):
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
-    @property
-    def is_admin(self):
-        return self.is_superuser
 
     def __str__(self):
         return self.email

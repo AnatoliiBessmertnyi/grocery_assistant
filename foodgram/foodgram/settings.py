@@ -118,9 +118,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
-
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-
     'PAGE_SIZE': 6,
 }
 
@@ -133,10 +131,10 @@ DJOSER = {
 #     'AUTH_HEADER_TYPES': ('Bearer',),
 # }
 
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+# EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
-DEFAULT_FROM_EMAIL = 'welcome@yamdb.com'
+# DEFAULT_FROM_EMAIL = 'welcome@yamdb.com'
 
 MAX_LENGHT = int(256)

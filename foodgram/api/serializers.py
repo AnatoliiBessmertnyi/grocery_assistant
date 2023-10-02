@@ -2,6 +2,10 @@ import base64
 import re
 
 from django.core.files.base import ContentFile
+from django.contrib.auth import get_user_model
+from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
+
 from recipes.models import (
     FavoriteRecipe,
     Follow,
@@ -11,9 +15,8 @@ from recipes.models import (
     ShoppingCart,
     Tag,
 )
-from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
-from users.models import CustomUser as User
+
+User = get_user_model()
 
 
 class Base64ImageField(serializers.ImageField):
@@ -248,6 +251,12 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
         )
+    
+    def create(self, validated_data):
+        user = User.objects.create(**validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
 
 
 class UserCreateSerializer(serializers.ModelSerializer):

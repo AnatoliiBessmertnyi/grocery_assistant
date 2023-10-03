@@ -100,7 +100,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
         read_only_fields = ('author',)
-    
+
     def create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
             IngredientRecipe.objects.create(
@@ -113,12 +113,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
+        recipe.tags.set(tags)
         self.create_ingredients(ingredients, recipe)
-        for tag in tags:
-            Recipe.objects.create(
-                recipe=recipe,
-                tag=tag.get('id'),
-            )
         return recipe
 
     def update(self, instance, validated_data):

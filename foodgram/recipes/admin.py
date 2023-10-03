@@ -32,7 +32,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'get_ingredients',
         'cooking_time',
         'author',
-        'description',
+        'text',
         'pub_date',
     )
     search_fields = ('name',)

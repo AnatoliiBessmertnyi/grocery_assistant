@@ -77,7 +77,7 @@ class Recipe(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Автор',
     )
-    description = models.TextField(
+    text = models.TextField(
         verbose_name='Описание',
     )
     image = models.ImageField(

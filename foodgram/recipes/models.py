@@ -1,5 +1,11 @@
-from django.db import models
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.core import validators
+from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+User = get_user_model()
 
 
 class Tag(models.Model):
@@ -55,25 +61,29 @@ class Recipe(models.Model):
     name = models.CharField(
         max_length=settings.MAX_LENGHT,
         verbose_name='Название',
-
     )
     tags = models.ManyToManyField(
         Tag,
-        through='TagRecipe',
         verbose_name='Тэг',
-
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        through='IngredientRecipe',
+        through='RecipeIngredient',
+        related_name='recipes',
         verbose_name='Ингредиент',
     )
-    cooking_time = models.IntegerField(
-        verbose_name='Время приготовления рецепта в минутах',
+    cooking_time = models.PositiveSmallIntegerField(
+        verbose_name='Время приготовления в минутах',
+        validators=[
+            validators.MinValueValidator(
+                1,
+                message='Мин. время приготовления 1 минута',
+            ),
+        ],
     )
     author = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        related_name='recipes',
+        User,
+        related_name='recipe',
         on_delete=models.CASCADE,
         verbose_name='Автор',
     )
@@ -81,7 +91,7 @@ class Recipe(models.Model):
         verbose_name='Описание',
     )
     image = models.ImageField(
-        upload_to='recipes/images/',
+        upload_to='static/recipes/',
         null=True,
         blank=True,
         verbose_name='Картинка',
@@ -97,10 +107,11 @@ class Recipe(models.Model):
         ordering = ['-pub_date']
 
     def __str__(self):
-        return self.name
+        return f'{self.name} {self.author.email}'
 
 
-class IngredientRecipe(models.Model):
+
+class RecipeIngredient(models.Model):
     """Промежуточная модель для связи между рецептом и ингредиентом."""
     recipe = models.ForeignKey(
         Recipe,
@@ -114,75 +125,72 @@ class IngredientRecipe(models.Model):
         related_name='ingredient',
         verbose_name='Ингредиент',
     )
-    amount = models.IntegerField(
+    amount = models.PositiveSmallIntegerField(
+        default=1,
         verbose_name='Количество ингредиентов',
+        validators=[
+            validators.MinValueValidator(
+                1,
+                message='Мин. количество ингредиентов 1',
+            ),
+        ],
     )
 
     class Meta:
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
-
-    def __str__(self):
-        return f'{self.recipe} {self.ingredient}'
-
-
-class TagRecipe(models.Model):
-    """Промежуточная модель для связи между тэгом и рецептом."""
-    tag = models.ForeignKey(
-        Tag,
-        on_delete=models.CASCADE,
-        verbose_name='Тэг'
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Рецепт'
-    )
-
-    class Meta:
-        verbose_name = 'Тэг и рецепт'
-        verbose_name_plural = 'Тэги и рецепты'
-
-    def __str__(self):
-        return f'{self.tag} {self.recipe}'
+        ordering = ['-id']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='unique ingredient',
+            ),
+        ]
 
 
-class Follow(models.Model):
+class Subscribe(models.Model):
     """Модель подписок на автора."""
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        related_name='follower',
+        User,
         on_delete=models.CASCADE,
+        related_name='follower',
         verbose_name='Подписчик',
     )
-    following = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        related_name='following',
+    author = models.ForeignKey(
+        User,
         on_delete=models.CASCADE,
+        related_name='following',
         verbose_name='Автор',
     )
+    created = models.DateTimeField('Дата подписки', auto_now_add=True)
 
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
         ordering = ['-id']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'],
+                name='unique_subscription',
+            ),
+        ]
 
     def __str__(self):
-        return f'{self.user} {self.following}'
+        return f'{self.user} {self.author}'
 
 
 class FavoriteRecipe(models.Model):
     """Модель избранных рецептов."""
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+    user = models.OneToOneField(
+        User,
         on_delete=models.CASCADE,
-        related_name='favoriter',
+        null=True,
+        related_name='favorite_recipe',
         verbose_name='Пользователь',
     )
-    recipe = models.ForeignKey(
+    recipe = models.ManyToManyField(
         Recipe,
-        on_delete=models.CASCADE,
-        related_name='favoriting',
+        related_name='favorite_recipe',
         verbose_name='Рецепт',
     )
 
@@ -192,20 +200,24 @@ class FavoriteRecipe(models.Model):
 
     def __str__(self):
         return f'{self.user} {self.recipe}'
+    
+    @receiver(post_save, sender=User)
+    def create_favorite_recipe(sender, instance, created, **kwargs):
+        if created:
+            return FavoriteRecipe.objects.create(user=instance)
 
 
 class ShoppingCart(models.Model):
     """Модель корзины."""
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+    user = models.OneToOneField(
+        User,
         on_delete=models.CASCADE,
-        related_name='buyer',
+        related_name='shopping_cart',
         verbose_name='Пользователь',
     )
-    recipe = models.ForeignKey(
+    recipe =models.ManyToManyField(
         Recipe,
-        on_delete=models.CASCADE,
-        related_name='buying',
+        related_name='shopping_cart',
         verbose_name='Рецепт',
     )
 
@@ -215,3 +227,8 @@ class ShoppingCart(models.Model):
 
     def __str__(self):
         return f'{self.user} {self.recipe}'
+
+    @receiver(post_save, sender=User)
+    def create_shopping_cart(sender, instance, created, **kwargs):
+        if created:
+            return ShoppingCart.objects.create(user=instance)

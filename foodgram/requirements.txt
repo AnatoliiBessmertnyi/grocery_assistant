@@ -10,3 +10,4 @@ uritemplate
 django-cors-headers
 xhtml2pdf
 psycopg2-binary
+drf-base64

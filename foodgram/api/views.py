@@ -123,7 +123,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = self.request.user
         context = user.buyer.values(
             'recipe__ingredients__name',
-            'recipe__ingredients__measure'
+            'recipe__ingredients__measurement_unit'
         ).annotate(total=Sum('recipe__ingredientrecipe__amount'))
         return self.html_to_pdf('carttopdf.html', {'context': context})
 
@@ -154,3 +154,4 @@ class FollowViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+

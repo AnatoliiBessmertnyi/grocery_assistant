@@ -15,7 +15,7 @@ from .models import (
 class IngredientRecipeAdmin(admin.StackedInline):
     model = IngredientRecipe
     list_display = (
-        'measure',
+        'measurement_unit',
     )
 
 
@@ -48,11 +48,11 @@ class RecipeAdmin(admin.ModelAdmin):
     def get_ingredients(self, obj):
         return '\n '.join([
             f'{item["ingredient__name"]} - {item["amount"]}'
-            f' {item["ingredient__measure"]}.'
+            f' {item["ingredient__measurement_unit"]}.'
             for item in obj.recipe.values(
                 'ingredient__name',
                 'amount',
-                'ingredient__measure',
+                'ingredient__measurement_unit',
             )])
 
 
@@ -83,7 +83,7 @@ class TagAdmin(admin.ModelAdmin):
 class IngredientAdmin(admin.ModelAdmin):
     list_display = (
         'name',
-        'measure',
+        'measurement_unit',
     )
     search_fields = ('name',)
     empty_value_display = '-пусто-'

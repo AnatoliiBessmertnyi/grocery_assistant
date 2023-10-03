@@ -3,23 +3,10 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 
-username_validator = RegexValidator(
-    regex=r'^[\w.@+-]+$',
-    message=(
-        'Имя пользователя должно состоять из буквенно-цифровых символов, '
-        'а также знаков ".", "@", "+", "-" и не содержать других символов.'
-    ),
-)
 
 
 class CustomUser(AbstractUser):
-    """Пользовательская модель пользователя с уникальным идентификатором."""
-    username = models.CharField(
-        unique=True,
-        max_length=settings.MAX_LENGHT,
-        validators=[username_validator],
-        verbose_name='Имя пользователя',
-    )
+    """Пользовательская модель пользователя."""
     email = models.EmailField(
         unique=True,
         max_length=settings.MAX_LENGHT,

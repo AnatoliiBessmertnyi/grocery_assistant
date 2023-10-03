@@ -12,8 +12,8 @@ from rest_framework_simplejwt.tokens import AccessToken
 from djoser.views import UserViewSet
 
 from .serializers import (
-    TokenSerializer,
-    UserCreateSerializer,
+    # TokenSerializer,
+    # UserCreateSerializer,
     UserSerializer,
 )
 

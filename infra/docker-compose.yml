@@ -9,6 +9,7 @@ volumes:
 services:
   db:
     image: postgres:13.10
+    container_name: foodgram_db
     env_file: ../.env
     volumes:
       - pg_data:/var/lib/postgresql/data/
@@ -17,11 +18,12 @@ services:
     build:
       context: ../foodgram
       dockerfile: Dockerfile
+    container_name: foodgram_backend
     env_file: ../.env
     restart: always
     volumes:
       - static:/app/static/
-      - media:/app/media
+      - media:/app/media/
     depends_on:
       - db
 
@@ -29,12 +31,14 @@ services:
     build:
       context: ../frontend
       dockerfile: Dockerfile
+    container_name: foodgram_frontend
     env_file: ../.env
     volumes:
       - ../frontend/:/app/result_build/
 
   nginx:
     image: nginx:1.19.3
+    container_name: foodgram_grateway
     env_file: ../.env
     ports:
       - "80:80"

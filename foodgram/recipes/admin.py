@@ -1,14 +1,7 @@
 from django.contrib import admin
 
-from .models import (
-    FavoriteRecipe,
-    Subscribe,
-    Ingredient,
-    RecipeIngredient,
-    Recipe,
-    ShoppingCart,
-    Tag,
-)
+from .models import (FavoriteRecipe, Ingredient, Recipe, RecipeIngredient,
+                     ShoppingCart, Subscribe, Tag)
 
 
 class RecipeIngredientAdmin(admin.StackedInline):

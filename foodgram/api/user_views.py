@@ -2,19 +2,15 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.db.models.expressions import Exists, OuterRef, Value
 from djoser.views import UserViewSet
-from rest_framework import status, permissions
+from recipes.models import Subscribe
+from rest_framework import permissions, status
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from recipes.models import Subscribe
-from .serializers import (
-    SubscribeSerializer,
-    TokenSerializer,
-    UserCreateSerializer,
-    UserListSerializer,
-)
+from .serializers import (SubscribeSerializer, TokenSerializer,
+                          UserCreateSerializer, UserListSerializer)
 
 User = get_user_model()
 

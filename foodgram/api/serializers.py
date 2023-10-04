@@ -1,14 +1,13 @@
 import base64
 import re
 
-from django.conf import settings
 import django.contrib.auth.password_validation as validators
+from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
-from rest_framework import serializers
-
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Subscribe, Tag
+from rest_framework import serializers
 
 User = get_user_model()
 

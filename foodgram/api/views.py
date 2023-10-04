@@ -39,7 +39,7 @@ class SubscribeViewSet(
             'following__recipe'
         ).annotate(
             recipes_count=Count('following__recipe'),
-            is_subscribed=Value(True), 
+            is_subscribed=Value(True),
         )
 
     def get_object(self):
@@ -116,7 +116,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
-    
+
     def get_serializer_class(self):
         if self.action == 'list':
             return RecipeListSerializer

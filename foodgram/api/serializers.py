@@ -67,7 +67,7 @@ class UserListSerializer(serializers.ModelSerializer):
         fields = (
             'email', 'id', 'username',
             'first_name', 'last_name', 'is_subscribed')
-        
+
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
         return (
@@ -100,7 +100,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
     def validate_password(self, password):
         validators.validate_password(password)
         return password
-    
+
     def validate(self, data):
         username = data['username']
         email = data['email']
@@ -170,7 +170,7 @@ class RecipeUserSerializer(serializers.ModelSerializer):
             'last_name',
             'is_subscribed',
         )
-        
+
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
         return (
@@ -322,4 +322,3 @@ class SubscribeSerializer(serializers.ModelSerializer):
             recipes,
             many=True
         ).data
-

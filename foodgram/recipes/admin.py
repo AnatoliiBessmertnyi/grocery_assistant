@@ -77,7 +77,7 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = ('name','measurement_unit')
+    list_display = ('name', 'measurement_unit')
     search_fields = ('name',)
     empty_value_display = '-пусто-'
 
@@ -99,6 +99,7 @@ class SoppingCartAdmin(admin.ModelAdmin):
 
     @admin.display(description='Рецепты')
     def get_recipe(self, obj):
-        return [ f'{item["name"]} ' for item in obj.recipe.values('name')[:6]]
+        return [f'{item["name"]} ' for item in obj.recipe.values('name')[:6]]
+
 
 admin.site.register(RecipeIngredient)

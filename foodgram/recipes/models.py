@@ -44,7 +44,6 @@ class Ingredient(models.Model):
     measurement_unit = models.CharField(
         max_length=settings.MAX_LENGHT,
         verbose_name='Единица измерения',
-        
     )
 
     class Meta:
@@ -108,7 +107,6 @@ class Recipe(models.Model):
 
     def __str__(self):
         return f'{self.name} {self.author.email}'
-
 
 
 class RecipeIngredient(models.Model):
@@ -200,7 +198,7 @@ class FavoriteRecipe(models.Model):
 
     def __str__(self):
         return f'{self.user} {self.recipe}'
-    
+
     @receiver(post_save, sender=User)
     def create_favorite_recipe(sender, instance, created, **kwargs):
         if created:
@@ -215,7 +213,7 @@ class ShoppingCart(models.Model):
         related_name='shopping_cart',
         verbose_name='Пользователь',
     )
-    recipe =models.ManyToManyField(
+    recipe = models.ManyToManyField(
         Recipe,
         related_name='shopping_cart',
         verbose_name='Рецепт',

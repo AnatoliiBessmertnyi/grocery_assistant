@@ -7,7 +7,7 @@ jobs:
   checkout-and-print-tree:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository code 
+      - name: Check out repository
         uses: actions/checkout@v3
       - name: Print project tree
         run: tree .

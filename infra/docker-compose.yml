@@ -15,9 +15,7 @@ services:
       - pg_data:/var/lib/postgresql/data/
 
   backend:
-    build:
-      context: ../foodgram
-      dockerfile: Dockerfile
+    image: hegem0n/foodgram_backend
     container_name: foodgram_backend
     env_file: ../.env
     restart: always
@@ -28,9 +26,7 @@ services:
       - db
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: hegem0n/foodgram_frontend
     container_name: foodgram_frontend
     env_file: ../.env
     volumes:
@@ -38,10 +34,10 @@ services:
 
   nginx:
     image: nginx:1.19.3
-    container_name: foodgram_grateway
+    container_name: foodgram_gateway
     env_file: ../.env
     ports:
-      - "80:80"
+      - "8080:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ../frontend/build:/usr/share/nginx/html/

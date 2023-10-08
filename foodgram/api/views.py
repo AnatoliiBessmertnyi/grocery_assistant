@@ -67,7 +67,7 @@ class FavoriteRecipeViewSet(
         generics.RetrieveDestroyAPIView,
         generics.ListCreateAPIView):
     serializer_class = SubscribeRecipeSerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_object(self):
         recipe_id = self.kwargs['recipe_id']
@@ -77,7 +77,10 @@ class FavoriteRecipeViewSet(
 
     def create(self, request, *args, **kwargs):
         instance = self.get_object()
-        request.user.favorite_recipe.recipe.add(instance)
+        favorite_recipe, created = (
+            FavoriteRecipe.objects.get_or_create(user=request.user))
+        if not favorite_recipe.recipe.filter(id=instance.id).exists():
+            favorite_recipe.recipe.add(instance)
         serializer = self.get_serializer(instance)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

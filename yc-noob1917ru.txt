@@ -19,3 +19,16 @@ ALLOWED_HOSTS = ['51.250.110.193', '127.0.0.1', 'localhost', 'fgproject.hopto.or
 if os.getenv('ALLOWED_HOSTS') is not None:
     ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 #
+
+
+
+server {
+    listen 80;
+    server_name fgproject.hopto.org;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}

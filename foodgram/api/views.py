@@ -15,6 +15,7 @@ from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from .filters import IngredientFilter
 from .serializers import (IngredientSerializer, RecipeListSerializer,
                           RecipeSerializer, SubscribeRecipeSerializer,
                           SubscribeSerializer, TagSerializer)
@@ -155,7 +156,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         buffer = io.BytesIO()
         page = canvas.Canvas(buffer)
         pdfmetrics.registerFont(TTFont('FreeSans', 'FreeSans.ttf'))
-        # pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf')
         x_position, y_position = 50, 800
         shopping_cart = (
             request.user.shopping_cart.recipe.
@@ -209,3 +209,5 @@ class IngredientViewSet(viewsets.ModelViewSet):
     serializer_class = IngredientSerializer
     pagination_class = None
     permission_classes = (permissions.AllowAny,)
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = IngredientFilter

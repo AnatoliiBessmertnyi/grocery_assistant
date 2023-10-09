@@ -150,3 +150,5 @@ media/
 
 # Others
 node_modules
+fast_comands.txt
+nginx_prod.conf

@@ -1,8 +1,0 @@
-docker compose exec backend python manage.py migrate
-docker compose exec backend python manage.py load_tags
-docker compose exec backend python manage.py load_ingrs
-
-docker compose up
-docker compose down
-docker-compose down -v
-docker rmi $(docker images -q)

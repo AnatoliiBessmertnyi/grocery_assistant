@@ -88,8 +88,6 @@ class FavoriteRecipeViewSet(
         instance = self.get_object()
         favorite_recipe, created = (
             FavoriteRecipe.objects.get_or_create(user=request.user))
-        if not favorite_recipe.recipe.filter(id=instance.id).exists():
-            favorite_recipe.recipe.add(instance)
         serializer = self.get_serializer(instance)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

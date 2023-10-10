@@ -285,6 +285,14 @@ class SubscribeRecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
 
+    def validate(self, data):
+        recipe = self.instance
+        user = self.context['request'].user
+        if user.favorite_recipe.recipe.filter(id=recipe.id).exists():
+            raise serializers.ValidationError(
+                "Этот рецепт уже находится в вашем избранном.")
+        return data
+
 
 class SubscribeSerializer(serializers.ModelSerializer):
     """Сериализатор подписки на автора."""

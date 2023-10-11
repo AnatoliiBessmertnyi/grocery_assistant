@@ -50,19 +50,11 @@ class SubscribeViewSet(
     def create(self, request, *args, **kwargs):
         """Создание подписки на другого пользователя."""
         instance = self.get_object()
-        if request.user.id == instance.id:
-            return Response(
-                {'errors': 'Нельзя подписаться на себя!'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if request.user.follower.filter(author=instance).exists():
-            return Response(
-                {'errors': 'Вы уже подписаны!'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        subs = request.user.follower.create(author=instance)
-        serializer = self.get_serializer(subs)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        serializer = self.get_serializer(
+            instance, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_destroy(self, instance):
         """Удаление подписки на пользователя."""
@@ -86,10 +78,11 @@ class FavoriteRecipeViewSet(
     def create(self, request, *args, **kwargs):
         """Добавление рецепта в избранное."""
         instance = self.get_object()
-        favorite_recipe, created = (
-            FavoriteRecipe.objects.get_or_create(user=request.user))
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        serializer = self.get_serializer(
+            instance, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_destroy(self, instance):
         """Удаление рецепта из избранного."""

@@ -6,7 +6,8 @@ from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Subscribe, Tag
+from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
+                            RecipeIngredient, Subscribe, Tag)
 from rest_framework import serializers
 
 User = get_user_model()
@@ -293,6 +294,13 @@ class SubscribeRecipeSerializer(serializers.ModelSerializer):
                 "Этот рецепт уже находится в вашем избранном.")
         return data
 
+    def create(self, validated_data):
+        user = self.context['request'].user
+        favorite_recipe, created = FavoriteRecipe.objects.get_or_create(
+            user=user)
+        favorite_recipe.recipe.add(self.instance)
+        return self.instance
+
 
 class SubscribeSerializer(serializers.ModelSerializer):
     """Сериализатор подписки на автора."""
@@ -329,3 +337,20 @@ class SubscribeSerializer(serializers.ModelSerializer):
             recipes,
             many=True
         ).data
+
+    def validate(self, data):
+        request = self.context.get('request')
+        user = request.user
+        author = data['author']
+        if user.id == author.id:
+            raise serializers.ValidationError('Нельзя подписаться на себя!')
+        if user.follower.filter(author=author).exists():
+            raise serializers.ValidationError('Вы уже подписаны!')
+        return data
+
+    def create(self, validated_data):
+        user = self.context.get('request').user
+        author = validated_data['author']
+        subscription, created = Subscribe.objects.get_or_create(
+            user=user, author=author)
+        return subscription

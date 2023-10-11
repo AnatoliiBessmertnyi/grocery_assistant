@@ -1,6 +1,4 @@
 ## Данный для входа
-=======
->>>>>>> 5b14c67baf04cb6fb8239d15bde850e93befdaaa
 Адрес сайта http://fgproject.hopto.org/
 
 Логин суперпользователя: admin@gmail.com

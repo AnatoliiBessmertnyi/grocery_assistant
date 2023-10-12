@@ -1,6 +1,6 @@
 requests
-Django==3.2.3
-djangorestframework==3.12.4
+Django
+djangorestframework
 PyJWT
 djangorestframework-simplejwt
 django-filter

@@ -114,6 +114,50 @@ class ShoppingCartViewSet(
         """Удаление рецепта из корзины покупок."""
         self.request.user.shopping_cart.recipe.remove(instance)
 
+
+
+
+class RecipeViewSet(viewsets.ModelViewSet):
+    """Управление рецептами."""
+    queryset = Recipe.objects.all()
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+
+    def get_serializer_class(self):
+        """Определение класса сериализатора в зависимости от действия."""
+        if self.action == 'list':
+            return RecipeListSerializer
+        return RecipeSerializer
+
+    def get_queryset(self):
+        """Получение списка рецептов с информацией о пользователе."""
+        return Recipe.objects.annotate(
+            is_favorited=Exists(
+                FavoriteRecipe.objects.filter(
+                    user=self.request.user, recipe=OuterRef('id')
+                )
+            ),
+            is_in_shopping_cart=Exists(
+                ShoppingCart.objects.filter(
+                    user=self.request.user,
+                    recipe=OuterRef('id')
+                )
+            )
+        ).select_related('author').prefetch_related(
+            'tags', 'ingredients', 'recipe',
+            'shopping_cart', 'favorite_recipe'
+        ) if self.request.user.is_authenticated else Recipe.objects.annotate(
+            is_in_shopping_cart=Value(False),
+            is_favorited=Value(False),
+        ).select_related('author').prefetch_related(
+            'tags', 'ingredients', 'recipe',
+            'shopping_cart', 'favorite_recipe'
+        )
+
+    def perform_create(self, serializer):
+        """Создание нового рецепта с указанием автора."""
+        serializer.save(author=self.request.user)
+
     @action(
         detail=False,
         methods=['get'],
@@ -162,48 +206,6 @@ class ShoppingCartViewSet(
         return FileResponse(
             buffer, as_attachment=True, filename='shoppingcart.pdf'
         )
-
-
-class RecipeViewSet(viewsets.ModelViewSet):
-    """Управление рецептами."""
-    queryset = Recipe.objects.all()
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-    filter_backends = (DjangoFilterBackend,)
-
-    def get_serializer_class(self):
-        """Определение класса сериализатора в зависимости от действия."""
-        if self.action == 'list':
-            return RecipeListSerializer
-        return RecipeSerializer
-
-    def get_queryset(self):
-        """Получение списка рецептов с информацией о пользователе."""
-        return Recipe.objects.annotate(
-            is_favorited=Exists(
-                FavoriteRecipe.objects.filter(
-                    user=self.request.user, recipe=OuterRef('id')
-                )
-            ),
-            is_in_shopping_cart=Exists(
-                ShoppingCart.objects.filter(
-                    user=self.request.user,
-                    recipe=OuterRef('id')
-                )
-            )
-        ).select_related('author').prefetch_related(
-            'tags', 'ingredients', 'recipe',
-            'shopping_cart', 'favorite_recipe'
-        ) if self.request.user.is_authenticated else Recipe.objects.annotate(
-            is_in_shopping_cart=Value(False),
-            is_favorited=Value(False),
-        ).select_related('author').prefetch_related(
-            'tags', 'ingredients', 'recipe',
-            'shopping_cart', 'favorite_recipe'
-        )
-
-    def perform_create(self, serializer):
-        """Создание нового рецепта с указанием автора."""
-        serializer.save(author=self.request.user)
 
 
 class TagViewSet(viewsets.ModelViewSet):

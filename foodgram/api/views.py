@@ -8,11 +8,11 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
                             Tag)
+from reportlab.lib.pagesizes import letter
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
-from rest_framework import generics, permissions, status, viewsets
-from rest_framework.decorators import action
+from rest_framework import generics, permissions, status, views, viewsets
 from rest_framework.response import Response
 
 from .filters import IngredientFilter
@@ -50,11 +50,9 @@ class SubscribeViewSet(
     def create(self, request, *args, **kwargs):
         """Создание подписки на другого пользователя."""
         instance = self.get_object()
-        serializer = self.get_serializer(
-            instance, context={'request': request})
-        if serializer.is_valid(raise_exception=True):
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        subs = request.user.follower.create(author=instance)
+        serializer = self.get_serializer(subs)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_destroy(self, instance):
         """Удаление подписки на пользователя."""
@@ -66,7 +64,7 @@ class FavoriteRecipeViewSet(
         generics.ListCreateAPIView):
     """Управление избранными рецептами."""
     serializer_class = SubscribeRecipeSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.AllowAny,)
 
     def get_object(self):
         """Получение объекта рецепта по его идентификатору."""
@@ -76,17 +74,15 @@ class FavoriteRecipeViewSet(
         return recipe
 
     def create(self, request, *args, **kwargs):
-        """Добавление рецепта в избранное."""
+        """Создание подписки на другого пользователя."""
         instance = self.get_object()
-        serializer = self.get_serializer(
-            instance, context={'request': request})
-        if serializer.is_valid(raise_exception=True):
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        request.user.favorite_recipe.recipe.add(instance)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_destroy(self, instance):
         """Удаление рецепта из избранного."""
-        self.request.user.favorite_recipe.recipe.remove(instance)
+        self.request.user.shopping_cart.recipe.remove(instance)
 
 
 class ShoppingCartViewSet(
@@ -115,6 +111,55 @@ class ShoppingCartViewSet(
         self.request.user.shopping_cart.recipe.remove(instance)
 
 
+class DownloadShoppingCartView(views.APIView):
+    """Скачивание списка покупок в виде PDF файла."""
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        """Обработчик GET-запроса для создания и возврата списка покупок в виде
+        PDF файла."""
+        buffer = io.BytesIO()
+        page = canvas.Canvas(buffer, pagesize=letter)
+        pdfmetrics.registerFont(TTFont('FreeSans', 'FreeSans.ttf'))
+        x_position, y_position = 50, 800
+        shopping_cart = (
+            request.user.shopping_cart.recipe.
+            values(
+                'ingredients__name',
+                'ingredients__measurement_unit'
+            ).annotate(amount=Sum('recipe__amount')).order_by()
+        )
+        page.setFont('FreeSans', 14)
+        if shopping_cart:
+            indent = 20
+            page.drawString(x_position, y_position, 'Cписок покупок:')
+            for index, recipe in enumerate(shopping_cart, start=1):
+                page.drawString(
+                    x_position, y_position - indent,
+                    f'{index}. {recipe["ingredients__name"]} - '
+                    f'{recipe["amount"]} '
+                    f'{recipe["ingredients__measurement_unit"]}.'
+                )
+                y_position -= 15
+                if y_position <= 50:
+                    page.showPage()
+                    y_position = 800
+            page.save()
+            buffer.seek(0)
+            return FileResponse(
+                buffer, as_attachment=True, filename='shoppingcart.pdf'
+            )
+        page.setFont('FreeSans', 24)
+        page.drawString(
+            x_position,
+            y_position,
+            'Cписок покупок пуст!',
+        )
+        page.save()
+        buffer.seek(0)
+        return FileResponse(
+            buffer, as_attachment=True, filename='shoppingcart.pdf'
+        )
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -157,55 +202,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Создание нового рецепта с указанием автора."""
         serializer.save(author=self.request.user)
-
-    @action(
-        detail=False,
-        methods=['get'],
-        permission_classes=(permissions.IsAuthenticated,))
-    def download_shopping_cart(self, request):
-        """Скачивание списка покупок в виде PDF файла."""
-        buffer = io.BytesIO()
-        page = canvas.Canvas(buffer)
-        pdfmetrics.registerFont(TTFont('FreeSans', 'FreeSans.ttf'))
-        x_position, y_position = 50, 800
-        shopping_cart = (
-            request.user.shopping_cart.recipe.
-            values(
-                'ingredients__name',
-                'ingredients__measurement_unit'
-            ).annotate(amount=Sum('recipe__amount')).order_by()
-        )
-        page.setFont('FreeSans', 14)
-        if shopping_cart:
-            indent = 20
-            page.drawString(x_position, y_position, 'Cписок покупок:')
-            for index, recipe in enumerate(shopping_cart, start=1):
-                page.drawString(
-                    x_position, y_position - indent,
-                    f'{index}. {recipe["ingredients__name"]} - '
-                    f'{recipe["amount"]} '
-                    f'{recipe["ingredients__measurement_unit"]}.'
-                )
-                y_position -= 15
-                if y_position <= 50:
-                    page.showPage()
-                    y_position = 800
-            page.save()
-            buffer.seek(0)
-            return FileResponse(
-                buffer, as_attachment=True, filename='shoppingcart.pdf'
-            )
-        page.setFont('FreeSans', 24)
-        page.drawString(
-            x_position,
-            y_position,
-            'Cписок покупок пуст!',
-        )
-        page.save()
-        buffer.seek(0)
-        return FileResponse(
-            buffer, as_attachment=True, filename='shoppingcart.pdf'
-        )
 
 
 class TagViewSet(viewsets.ModelViewSet):

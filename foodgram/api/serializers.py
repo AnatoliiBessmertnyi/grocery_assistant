@@ -3,10 +3,9 @@ import base64
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from djoser.serializers import UserSerializer as DjoserUserSerializer
-from rest_framework import serializers
-
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
+from rest_framework import serializers
 from users.models import Subscription
 
 User = get_user_model()
@@ -55,7 +54,7 @@ class SubscriptionSerializer(UserSerializer):
         if limit:
             recipes = recipes[:int(limit)]
         return RecipeListSerializer(recipes, many=True).data
-    
+
     def validate(self, data):
         request = self.context.get('request')
         user = request.user
@@ -63,7 +62,9 @@ class SubscriptionSerializer(UserSerializer):
         if user == author:
             raise serializers.ValidationError('Нельзя подписаться на себя!')
         if Subscription.objects.filter(
-            author=author, subscriber=user).exists():
+            author=author,
+            subscriber=user
+        ).exists():
             raise serializers.ValidationError('Вы уже подписаны!')
         return data
 
@@ -129,8 +130,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def validate(self, data):
         for field in ('tags', 'ingredients', 'name', 'text', 'cooking_time'):
             if not self.initial_data.get(field):
-                raise serializers.ValidationError(
-                    f'Поле не заполнено')
+                raise serializers.ValidationError('Поле не заполнено')
         ingredients = self.initial_data['ingredients']
         ingredients_ids = set()
         for ingredient in ingredients:
@@ -145,12 +145,17 @@ class RecipeSerializer(serializers.ModelSerializer):
                     'Ингредиенты не должны повторяться.')
             ingredients_ids.add(ingredient['id'])
         request = self.context['request']
-        if request.method == 'POST' and (Favorite.objects.filter(
-            recipe=self.instance, user=request.user).exists() or
-            ShoppingCart.objects.filter(
-                recipe=self.instance, user=request.user).exists()):
+        if request.method == 'POST' and (
+            Favorite.objects.filter(
+                recipe=self.instance,
+                user=request.user,
+            ).exists()
+            or ShoppingCart.objects.filter(
+                recipe=self.instance,
+                user=request.user,
+            ).exists()
+        ):
             raise serializers.ValidationError('Рецепт уже добавлен.')
-        return data
 
     def get_is_favorited(self, obj):
         current_user = self.context['request'].user
@@ -183,7 +188,9 @@ class RecipeSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         request = self.context['request']
         if request.method == 'DELETE' and not Favorite.objects.filter(
-            recipe=instance, user=request.user).exists():
+            recipe=instance,
+            user=request.user,
+        ).exists():
             raise serializers.ValidationError('Рецепт не найден в избранном.')
         ingredients = self.initial_data.pop('ingredients')
         RecipeIngredient.objects.filter(recipe=instance).all().delete()

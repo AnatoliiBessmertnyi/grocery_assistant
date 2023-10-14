@@ -97,10 +97,6 @@ jobs:
           sudo docker compose -f docker-compose.production.yml up -d
           # Выполняет миграции, сбор статики и загружает теги с ингредиентами
           sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
-          sudo docker compose -f docker-compose.production.yml exec backend python manage.py load_tags
-          sudo docker compose -f docker-compose.production.yml exec backend python manage.py load_ingrs
-          sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
-          sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /app/static/
   
   send_message:
     runs-on: ubuntu-latest

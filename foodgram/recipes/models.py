@@ -5,6 +5,7 @@ from django.db import models
 
 User = get_user_model()
 
+
 class Recipe(models.Model):
     """Модель рецепта."""
     name = models.CharField(

@@ -13,10 +13,11 @@ User = get_user_model()
 
 class RecipeListSerializer(serializers.ModelSerializer):
     """Сериализатор списка рецептов."""
+
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
-        read_only_fields = '__all__'
+        read_only_fields = '__all__',
 
 
 class UserSerializer(DjoserUserSerializer):
@@ -107,7 +108,8 @@ class Base64ImageField(serializers.ImageField):
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')
             ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+            name = {self.context["request"].user.username}
+            data = ContentFile(base64.b64decode(imgstr), name=f'{name}.' + ext)
         return super().to_internal_value(data)
 
 
@@ -136,7 +138,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         for ingredient in ingredients:
             if not ingredient.get('amount') or not ingredient.get('id'):
                 raise serializers.ValidationError(
-                    'Пожалуйста, заполните поля "ингредиенты" правильно.')
+                    'Пожалуйста, заполните поле правильно.')
             if not int(ingredient['amount']) > 0:
                 raise serializers.ValidationError(
                     'Количество ингредиентов должно быть больше нуля.')
@@ -145,17 +147,12 @@ class RecipeSerializer(serializers.ModelSerializer):
                     'Ингредиенты не должны повторяться.')
             ingredients_ids.add(ingredient['id'])
         request = self.context['request']
-        if request.method == 'POST' and (
-            Favorite.objects.filter(
-                recipe=self.instance,
-                user=request.user,
-            ).exists()
+        if request.method == 'POST' and (Favorite.objects.filter(
+            recipe=self.instance, user=request.user).exists()
             or ShoppingCart.objects.filter(
-                recipe=self.instance,
-                user=request.user,
-            ).exists()
-        ):
+                recipe=self.instance, user=request.user).exists()):
             raise serializers.ValidationError('Рецепт уже добавлен.')
+        return data
 
     def get_is_favorited(self, obj):
         current_user = self.context['request'].user
@@ -171,7 +168,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return ShoppingCart.objects.filter(
             recipe=obj, user=current_user).exists()
 
-    def get_recipe_ingredient(self, recipe, ingredients):
+    def create_recipe_ingredient(self, recipe, ingredients):
         obj = (RecipeIngredient(
             recipe=recipe, ingredient_id=ing['id'], amount=ing['amount']
         ) for ing in ingredients)
@@ -182,19 +179,13 @@ class RecipeSerializer(serializers.ModelSerializer):
         ingredients = self.initial_data.pop('ingredients')
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
-        self.get_recipe_ingredient(recipe, ingredients)
+        self.create_recipe_ingredient(recipe, ingredients)
         return recipe
 
     def update(self, instance, validated_data):
-        request = self.context['request']
-        if request.method == 'DELETE' and not Favorite.objects.filter(
-            recipe=instance,
-            user=request.user,
-        ).exists():
-            raise serializers.ValidationError('Рецепт не найден в избранном.')
         ingredients = self.initial_data.pop('ingredients')
         RecipeIngredient.objects.filter(recipe=instance).all().delete()
-        self.get_recipe_ingredient(instance, ingredients)
+        self.create_recipe_ingredient(instance, ingredients)
         tags = self.initial_data.get('tags')
         instance.tags.set(tags)
         instance.image = validated_data.get('image', instance.image)

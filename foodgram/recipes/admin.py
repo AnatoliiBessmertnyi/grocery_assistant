@@ -17,20 +17,21 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('name', 'author__username', 'tags__slug', 'tags__name')
     filter_horizontal = ('tags',)
     inlines = (RecipeIngredientInline,)
-    empty_value_display = '-пусто-'
 
     @admin.display(description='Добавления в избранное')
     def added_to_favorites(self, obj: Recipe):
+        """Вычисляемое поле для админ панели.
+        Вовзращает количество добавлений рецепта в Избранное.
+        """
         return obj.favorites.count()
 
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'color', 'slug')
+    list_display = ('name', 'color', 'slug')
     list_editable = ('color', 'slug')
     search_fields = ('name',)
     prepopulated_fields = {'slug': ('name',)}
-    empty_value_display = '-пусто-'
 
 
 @admin.register(Ingredient)
@@ -39,23 +40,19 @@ class IngredientAdmin(admin.ModelAdmin):
     list_editable = ('measurement_unit',)
     list_filter = ('name',)
     search_fields = ('name',)
-    empty_value_display = '-пусто-'
 
 
 @admin.register(RecipeIngredient)
 class RecipeIngredientAdmin(admin.ModelAdmin):
     list_display = ('recipe', 'ingredient', 'amount')
     list_editable = ('amount',)
-    empty_value_display = '-пусто-'
 
 
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('id', 'recipe', 'user')
-    empty_value_display = '-пусто-'
 
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ('id', 'recipe', 'user')
-    empty_value_display = '-пусто-'

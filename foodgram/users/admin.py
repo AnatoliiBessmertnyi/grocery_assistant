@@ -11,11 +11,9 @@ User = get_user_model()
 class CustomUserAdmin(UserAdmin):
     list_filter = ('email', 'username', 'is_staff', 'is_active')
     search_fields = ('username', 'email')
-    empty_value_display = '-пусто-'
 
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ('id', 'author', 'subscriber')
     list_filter = ('author', 'subscriber')
-    empty_value_display = '-пусто-'

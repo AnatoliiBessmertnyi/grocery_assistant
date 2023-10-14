@@ -27,56 +27,22 @@ from .serializers import (IngredientSerializer, RecipeListSerializer,
 User = get_user_model()
 
 
-class DownloadShoppingCartView(views.APIView):
-    """Скачивание списка покупок в виде PDF файла."""
-    permission_classes = (IsAuthenticated,)
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    """Управление ингредиентами."""
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
     pagination_class = None
+    permission_classes = (ReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('^name',)
 
-    def get(self, request):
-        """Обработчик GET-запроса для создания и возврата списка покупок в виде
-        PDF файла."""
-        buffer = BytesIO()
-        page = canvas.Canvas(buffer, pagesize=letter)
-        pdfmetrics.registerFont(TTFont('FreeSans', 'FreeSans.ttf'))
-        x_position, y_position = 50, 800
-        shopping_cart = (
-            Recipe.objects.filter(shopping_cart__user=request.user).
-            values(
-                'ingredients__name',
-                'ingredients__measurement_unit'
-            ).annotate(amount=Sum('recipeingredient__amount')).order_by()
-        )
-        page.setFont('FreeSans', 14)
-        if shopping_cart:
-            indent = 20
-            page.drawString(x_position, y_position, 'Cписок покупок:')
-            for index, recipe in enumerate(shopping_cart, start=1):
-                page.drawString(
-                    x_position, y_position - indent,
-                    f'{index}. {recipe["ingredients__name"]} - '
-                    f'{recipe["amount"]} '
-                    f'{recipe["ingredients__measurement_unit"]}.'
-                )
-                y_position -= 15
-                if y_position <= 50:
-                    page.showPage()
-                    y_position = 800
-            page.save()
-            buffer.seek(0)
-            return FileResponse(
-                buffer, as_attachment=True, filename='shoppingcart.pdf'
-            )
-        page.setFont('FreeSans', 24)
-        page.drawString(
-            x_position,
-            y_position,
-            'Cписок покупок пуст!',
-        )
-        page.save()
-        buffer.seek(0)
-        return FileResponse(
-            buffer, as_attachment=True, filename='shoppingcart.pdf'
-        )
+
+class TagViewSet(viewsets.ModelViewSet):
+    """Управление категориями рецептов."""
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    pagination_class = None
+    permission_classes = (ReadOnly,)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -132,6 +98,63 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
 
 
+class DownloadShoppingCartView(views.APIView):
+    """Скачивание списка покупок в виде PDF файла."""
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        """Обработчик GET-запроса для создания и возврата списка покупок в виде
+        PDF файла."""
+        buffer = BytesIO()
+        page = canvas.Canvas(buffer, pagesize=letter)
+        pdfmetrics.registerFont(TTFont('FreeSans', 'FreeSans.ttf'))
+        x_position, y_position = 50, 800
+        shopping_cart = (
+            Recipe.objects.filter(shopping_cart__user=request.user)
+            .values(
+                'ingredients__name',
+                'ingredients__measurement_unit'
+            )
+            .annotate(amount=Sum('recipeingredient__amount'))
+            .order_by()
+        )
+        page.setFont('FreeSans', 14)
+        if shopping_cart:
+            indent = 20
+            page.drawString(x_position, y_position, 'Cписок покупок:')
+            for index, recipe in enumerate(shopping_cart, start=1):
+                page.drawString(
+                    x_position, y_position - indent,
+                    f'{index}. {recipe["ingredients__name"]} - '
+                    f'{recipe["amount"]} '
+                    f'{recipe["ingredients__measurement_unit"]}.'
+                )
+                y_position -= 15
+                if y_position <= 50:
+                    page.showPage()
+                    y_position = 800
+            page.save()
+            buffer.seek(0)
+            response = FileResponse(
+                buffer, content_type='application/pdf')
+            response['Content-Disposition'] = (
+                'attachment; filename="shoppingcart.pdf"')
+            return response
+        page.setFont('FreeSans', 24)
+        page.drawString(
+            x_position,
+            y_position,
+            'Cписок покупок пуст!',
+        )
+        page.save()
+        buffer.seek(0)
+        response = FileResponse(
+            buffer, content_type='application/pdf')
+        response['Content-Disposition'] = (
+            'attachment; filename="shoppingcart.pdf"')
+        return response
+
+
 class UserViewSet(DjoserUserViewSet):
     """Управление пользователями."""
     serializer_class = SubscriptionSerializer
@@ -140,7 +163,7 @@ class UserViewSet(DjoserUserViewSet):
     @action(methods=['post'], detail=True,
             permission_classes=[IsAuthenticated])
     def subscribe(self, request, id):
-        """Подписать текущего пользователя на автора рецепта."""
+        """Подписать на автора рецепта."""
         author = get_object_or_404(User, pk=id)
         _, created = Subscription.objects.get_or_create(
             author=author, subscriber=request.user)
@@ -149,13 +172,13 @@ class UserViewSet(DjoserUserViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
-    def unsubscribe(self, request, id):
-        """Отписать текущего пользователя от автора рецепта."""
+    def delete_subscribe(self, request, id):
+        """Отписывает от автора рецепта."""
         author = get_object_or_404(User, pk=id)
         subscription = get_object_or_404(
             Subscription, author=author, subscriber=request.user)
         subscription.delete()
-        return Response({"успешно": "Вы успешно отписаны."},
+        return Response({"success": "Вы успешно отписаны."},
                         status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=False,
@@ -171,21 +194,3 @@ class UserViewSet(DjoserUserViewSet):
         serializer = self.get_serializer(
             authors, many=True, context={'request': request})
         return Response(serializer.data)
-
-
-class TagViewSet(viewsets.ModelViewSet):
-    """Управление категориями рецептов."""
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-    pagination_class = None
-    permission_classes = (ReadOnly,)
-
-
-class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    """Управление ингредиентами."""
-    queryset = Ingredient.objects.all()
-    serializer_class = IngredientSerializer
-    pagination_class = None
-    permission_classes = (ReadOnly,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('^name',)

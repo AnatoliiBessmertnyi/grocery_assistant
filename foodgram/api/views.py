@@ -53,7 +53,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (OwnerOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    pagination_class = PageNumberPagination
 
     def perform_create(self, serializer):
         """Создание нового рецепта."""
